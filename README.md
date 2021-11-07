@@ -126,9 +126,9 @@ would be stored in an array as:
 That is:  
 `weights = [2, inf, 1, 6, inf, 3, 5, 9, inf, inf]`
 
-For a node $i$ and a node $j$ how is computed the index in the array of the edge between these two nodes?  
+For a node `i` and a node `j` how is computed the index in the array of the edge between these two nodes?  
 Well, it's pretty simple:
-* swap $i$ and $j$ if $i < j$ (because we consider only the lower triangular part of the connectivity matrix)
+* swap `i` and `j` if `i < j` (because we consider only the lower triangular part of the connectivity matrix)
 * index `k` is equal to <!-- $\frac{i(i-1)}{2} + j$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20j">  
 **Proof**:   
 For a square matrix of size `2` elements of the lower triangular part can indexed this way:  
@@ -163,8 +163,8 @@ Finally, the last structure defined in graph.h is `struct RandomGraph` which inh
 
 The private function `build_edges()` is in charge of randomly selecting edges and allocating their weight.  
 Here is how it works:  
-We know that in an undirected graph of size `V` *(with no node connected to itself)* we can have a maximum of $\frac{V(V-1)}{2}$ edges between nodes *(then we have a fully connected graph)*.  
-Hence, to get a random graph of a given $density$, we must uniformly pick up <!-- $\left\lfloor\ density \times \frac{V(V-1)}{2}\right\rfloor$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cleft%5Clfloor%5C%20density%20%5Ctimes%20%5Cfrac%7BV(V-1)%7D%7B2%7D%5Cright%5Crfloor"> edges.  
+We know that in an undirected graph of size `V` *(with no node connected to itself)* we can have a maximum of <!-- $\frac{V(V-1)}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7BV(V-1)%7D%7B2%7D"> edges between nodes *(then we have a fully connected graph)*.  
+Hence, to get a random graph of a given `density`, we must uniformly pick up <!-- $\left\lfloor\ density \times \frac{V(V-1)}{2}\right\rfloor$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cleft%5Clfloor%5C%20density%20%5Ctimes%20%5Cfrac%7BV(V-1)%7D%7B2%7D%5Cright%5Crfloor"> edges.  
 Below is the pseudo-code for doing that *(I used // for comments)*:  
 ```
 //Maximum number of edges in the graph

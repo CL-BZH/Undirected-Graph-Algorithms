@@ -129,34 +129,33 @@ That is:
 For a node $i$ and a node $j$ how is computed the index in the array of the edge between these two nodes?  
 Well, it's pretty simple:
 * swap $i$ and $j$ if $i < j$ (because we consider only the lower triangular part of the connectivity matrix)
-* index `k` is equal to $\frac{i(i-1)}{2} + j$  
+* index `k` is equal to <!-- $\frac{i(i-1)}{2} + j$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20j">  
 **Proof**:   
 For a square matrix of size `2` elements of the lower triangular part can indexed this way:  
 0  
 For a square matrix of size `3` elements of the lower triangular part can indexed this way:  
 0  
-1 $\space$ 2    
+1 &nbsp; 2    
 For a square matrix of size `4` elements of the lower triangular part can indexed this way:  
 0  
-1 $\space$ 2  
-3 $\space$ 4 $\space$ 5   
-So, on row `i=0` we have `T(0)=1` entry. If `T(i)` is the number of entry on row `i` then the number of entries on row `i+1` is `T(i+1) = T(i) + 1`. Hence, the number of entry on row `l` is `l+1`. If we index the entries as shown above, then the index at the beginning of row `i` `(i>0)` will be the sum of number of entries from row `0` to row `i-1`, i.e. 
-$\sum_{l=0}^{i-1}(l+1) = \sum_{l=1}^{i}{l} = \frac{i(i-1)}{2}$.  
-Therefore the index at column `j` of row `i` is $\frac{i(i-1)}{2} + j$.
+1 &nbsp; 2  
+3 &nbsp; 4 &nbsp; 5   
+So, on row `i=0` we have `T(0)=1` entry. If `T(i)` is the number of entry on row `i` then the number of entries on row `i+1` is `T(i+1) = T(i) + 1`. Hence, the number of entry on row `l` is `l+1`. If we index the entries as shown above, then the index at the beginning of row `i` `(i>0)` will be the sum of number of entries from row `0` to row `i-1`, i.e. <!-- $\sum_{l=0}^{i-1}(l+1) = \sum_{l=1}^{i}{l} = \frac{i(i-1)}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Csum_%7Bl%3D0%7D%5E%7Bi-1%7D(l%2B1)%20%3D%20%5Csum_%7Bl%3D1%7D%5E%7Bi%7D%7Bl%7D%20%3D%20%5Cfrac%7Bi(i-1)%7D%7B2%7D">.  
+Therefore the index at column `j` of row `i` is <!-- $\frac{i(i-1)}{2} + j$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20j">.
 
-So, in the previous example, the edge between node 4 and 1 is found in the array at index $\frac{4(4-1)}{2} + 1 = 7$. The weight for this edge is `weights[7] = 9`.
+So, in the previous example, the edge between node 4 and 1 is found in the array at index <!-- $\frac{4(4-1)}{2} + 1 = 7$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7B4(4-1)%7D%7B2%7D%20%2B%201%20%3D%207">. The weight for this edge is `weights[7] = 9`.
 
 In the opposite direction, having an index `k` for the array of edges weights, how can we find the 2 nodes, `i` and `j`, that are linked by this edge?  
-Well, we know that $\space k = \frac{i(i-1)}{2} + j \space$ with $\space 0\le j<i$ *(swap `i` and `j` if needed)*.  
+Well, we know that <!-- $\space k = \frac{i(i-1)}{2} + j \space$ with $\space 0\le j<i$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20k%20%3D%20%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20j%20%5Cspace%24%20with%20%24%5Cspace%200%5Cle%20j%3Ci"> *(swap `i` and `j` if needed)*.  
 
-So, we have $\frac{i(i-1)}{2} \le k < \frac{i(i-1)}{2} + i$.  
+So, we have <!-- $\frac{i(i-1)}{2} \le k < \frac{i(i-1)}{2} + i$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%5Cle%20k%20%3C%20%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20i">.  
 
-Solving $\space k = \frac{i(i-1)}{2} \space $ gives $\space i = \frac{-1+\sqrt{1+8k}}{2}$  
+Solving <!-- $\space k = \frac{i(i-1)}{2} \space $ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20k%20%3D%20%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%5Cspace"> gives <!-- $\space i = \frac{-1+\sqrt{1+8k}}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20i%20%3D%20%5Cfrac%7B-1%2B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D">  
 
-And solving $\space k = \frac{i(i-1)}{2} + i \space $ gives $\space i = \frac{1+\sqrt{1+8k}}{2}$  
+And solving <!-- $\space k = \frac{i(i-1)}{2} + i \space $ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20k%20%3D%20%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20i%20%5Cspace"> gives <!-- $\space i = \frac{1+\sqrt{1+8k}}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20i%20%3D%20%5Cfrac%7B1%2B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D">  
    
-Therefore, $\frac{-1+\sqrt{1+8k}}{2} < i \le \frac{1+\sqrt{1+8k}}{2}$ , or again, $\frac{\sqrt{1+8k}}{2} - \frac{1}{2} < i \le \frac{\sqrt{1+8k}}{2} + \frac{1}{2}$.  
-Hence, $i = \left\lfloor\frac{\sqrt{1+8k}}{2} + \frac{1}{2}\right\rfloor$ and $j = k - \frac{i(i-1)}{2}$.
+Therefore, <!-- $\frac{-1+\sqrt{1+8k}}{2} < i \le \frac{1+\sqrt{1+8k}}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7B-1%2B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D%20%3C%20i%20%5Cle%20%5Cfrac%7B1%2B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D"> , or again, <!-- $\frac{\sqrt{1+8k}}{2} - \frac{1}{2} < i \le \frac{\sqrt{1+8k}}{2} + \frac{1}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%3C%20i%20%5Cle%20%5Cfrac%7B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D%20%2B%20%5Cfrac%7B1%7D%7B2%7D">.  
+Hence, <!-- $i = \left\lfloor\frac{\sqrt{1+8k}}{2} + \frac{1}{2}\right\rfloor$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=i%20%3D%20%5Cleft%5Clfloor%5Cfrac%7B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D%20%2B%20%5Cfrac%7B1%7D%7B2%7D%5Cright%5Crfloor"> and <!-- $j = k - \frac{i(i-1)}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=j%20%3D%20k%20-%20%5Cfrac%7Bi(i-1)%7D%7B2%7D">.
 
 Finally, the last structure defined in graph.h is `struct RandomGraph` which inherites from `Graph` since it is a graph. The two main additions are the `density` and the `range`.  
 `density` defines the number of connections in the graph (see below).  
@@ -165,7 +164,7 @@ Finally, the last structure defined in graph.h is `struct RandomGraph` which inh
 The private function `build_edges()` is in charge of randomly selecting edges and allocating their weight.  
 Here is how it works:  
 We know that in an undirected graph of size `V` *(with no node connected to itself)* we can have a maximum of $\frac{V(V-1)}{2}$ edges between nodes *(then we have a fully connected graph)*.  
-Hence, to get a random graph of a given $density$, we must uniformly pick up $\left\lfloor\ density \times \frac{V(V-1)}{2}\right\rfloor$ edges.  
+Hence, to get a random graph of a given $density$, we must uniformly pick up <!-- $\left\lfloor\ density \times \frac{V(V-1)}{2}\right\rfloor$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cleft%5Clfloor%5C%20density%20%5Ctimes%20%5Cfrac%7BV(V-1)%7D%7B2%7D%5Cright%5Crfloor"> edges.  
 Below is the pseudo-code for doing that *(I used // for comments)*:  
 ```
 //Maximum number of edges in the graph
@@ -205,12 +204,12 @@ Structured types defined in this file:
 `struct Path` defines a path between two nodes `n1` and `n2`.
 
 `struct ShortestPath` defines the interface for shortest path algorithm.  
-Since it is an interface the functions for computing a shortest path are pure virtual functions and are override in the derived class.
+Since it is an interface the functions for computing a shortest path are pure virtual functions and are overriden in the derived class.
 ```C++
 virtual std::unique_ptr<ShortestPath> clone(const Graph& graph) const = 0;
 virtual void compute_path(Path& path) = 0;
 ```
-`struct DijkstraShortestPath` and `struct BellmanFordShortestPath` inherite from `struct ShortestPath` and override the functions `clone()` and `compute_path()`.
+`struct DijkstraShortestPath` and `struct BellmanFordShortestPath` inherite from `struct ShortestPath` and overrides the functions `clone()` and `compute_path()`.
 
 `compute_path()` in `struct DijkstraShortestPath` implement the Dijkstra algorithm. When a shortest path between two nodes is found it is added to the known path for memoization *(i.e. `struct DijkstraShortestPath` can be used for dynamic programming)*.  
 

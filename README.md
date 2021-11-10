@@ -83,21 +83,21 @@ Estimation of the variance of the mean distance: 0.0251515
 
 ```
 
-### <span style="color:lime">Minimum Spanning Tree</span>
+### <span style="color:lime">Minimum Spanning Trees</span>
 An example on how to run the Prim's algorithm on an undirect graph is shown in main.cpp.  
-Below is the result when the test is performed on the graph described in file `mst_test.txt` that can be found in the `Test` directory.  
+Below are the results when tests are performed on the graph described in file `mst_test.txt` that can be found in the `Test` directory.  
 The graph looks like this:  
 ![mst_test.txt](./Images/mst_test.png "Graph on which MST algo is run")  
 And the minimum spanning trees obtained taking node 0, 1, 2, 3 and 4 as root respectively are these:  
 *(one can see that as expected the sum of weights is always the same)*  
-![mst_test.txt](./Images/mst_test_mst_root_0.png "Graph on which MST algo is run")
-![mst_test.txt](./Images/mst_test_mst_root_1.png "Graph on which MST algo is run")
-![mst_test.txt](./Images/mst_test_mst_root_2.png "Graph on which MST algo is run")
-![mst_test.txt](./Images/mst_test_mst_root_3.png "Graph on which MST algo is run")
-![mst_test.txt](./Images/mst_test_mst_root_4.png "Graph on which MST algo is run")  
+![mst_test.txt](./Images/mst_test_mst_root_0.png "MST for node 0 as root")
+![mst_test.txt](./Images/mst_test_mst_root_1.png "MST for node 1 as root")
+![mst_test.txt](./Images/mst_test_mst_root_2.png "MST for node 2 as root")
+![mst_test.txt](./Images/mst_test_mst_root_3.png "MST for node 3 as root")
+![mst_test.txt](./Images/mst_test_mst_root_4.png "MST for node 4 as root")  
 
 ## Code details
-The C++ code is splitted in four files:
+The C++ code is splitted in eight files:
 
 * <span style="color:lime">graph.h</span>
 * <span style="color:lime">shortestpath.h</span>
@@ -108,14 +108,14 @@ The C++ code is splitted in four files:
 * <span style="color:lime">trace.h</span>
 * <span style="color:lime">main.cpp</span>
 
-There is also a `Tools` directory with some tools in Python for plotting graphs and trees (Python igraph needs to be installed to be able to use these tools).  
-The `Test` directory contains text files describing graphs. These files' path can be passed to Graph to initialized a graph (see an example on how to do that in main.cpp).
+There is also a `Tools` directory with some tools in `Python` for plotting graphs and trees (Python `igraph` needs to be installed to be able to use these tools).  
+The `Test` directory contains text files describing graphs. These files' path can be passed to Graph to initialized a graph (see an example on how to do that in `main.cpp`).
 
 Code for *(random)* undirected graph is in `graph.h`.  
 The algorithms for shortest path are implemented in `shortestpath.h`.  
 `montecarlo.h` defines the generic interface for running Monte-Carlo simulation.  
 `shortestpathmontecarlo.h` implements the Monte-carlo simulation for shortest path algorithms.  
-The algorithms for Depth First Search can be found in `dfs.h`.
+The algorithms for Depth First Search can be found in `dfs.h`.  
 In `mst.h` is the code for building Minimum Spanning Trees from undirected connected graphs.  
 In `trace.h` a simple class for tracing is defined *(it is used in mst.h.)*.  
 `main.cpp` just shows examples on how to run the algorithms and the Monte-carlo simulation.
@@ -123,7 +123,8 @@ In `trace.h` a simple class for tracing is defined *(it is used in mst.h.)*.
 Let's detail the content of each files.  
 
 
-> Note: since I prefer to have the public elements of a class at the beginning of the class I use "struct" keyword instead of "class".
+> Note:  
+since I prefer to have the public elements of a class at the beginning of the class I use "struct" keyword instead of "class".
 
 ---
 ### <span style="color:lime">graph.h</span>
@@ -278,19 +279,19 @@ It can be used for example to check if a graph is connected since for a connecte
 
 ---
 ### <span style="color:lime">mst.h</span>
-This file contains the object definition to run Minimum Spanning Tree algorithm on a connected graph.  
+This file contains the class definitions that can be used to run Minimum Spanning Tree algorithms on a connected graph.  
 The four objects' types defined in that file are:
 * `struct MstElement` 
 * `struct MST`
 * `struct Prim: MST`
-* `struct Kruskal: MST`
+* `struct Kruskal: MST` *(Not complete)*
 
-An `MST` object has a vector of `MstElement` of size the number of vertices in the graph. This is where the nodes of the graph are instatiated *(remember a graph object defines only the topology of a graph)*.  
+An `MST` object has a vector of `MstElement` that is of size the number of vertices in the graph. This is where the nodes of the graph are instatiated *(remember a graph object defines only the topology of a graph)*.  What is stored in the priority queue are pointers to these elements.  
 So, an `MstElement` stores a pointer to a node *(nodes are created on the heap)* and a boolean telling if the node was selected. It also has a field to store the id of its parent. The value given to the node by the algorithm is stored in the node itself *(see `Node` class in `graph.h`)*.  
-The `MstElement` class also overload the '`>`' operator so that pointers to MST's elements can be compared by the STL priority queue.  
+The `MstElement` class also overload the '`>`' operator so that MST's elements can be compared by the STL priority queue.   
 The base class called `MST` is generic and defines the interface for real implementation of the minimum spanning tree algorithms.   
 Hence `run()` is a pure virtual function. It takes as argument the id of the node to set as root for the spanning tree *(by default it is node 0)*.  
-So far only the Dijkstra-Jarnik-Prim's algorithm is implemented (see the override of `run()` in `struct Prim`).
+So far only the Dijkstra-Jarnik-Prim's algorithm *(a.k.a. Prim's algorithm)* is implemented (see the override of `run()` in `struct Prim`).
 
 The `MST` methods are:
 * `set_root()`  
@@ -312,9 +313,9 @@ To print the minimum spanning tree with the following format:
 
 * `draw()`  
 To draw the spanning tree using the Python script `draw_mst.py` *(located in the `Tools` directory)*.  
-Minimum spanning trees in the section "**Examples of results**" above where drawn using this function. 
+Minimum spanning trees in the section "**Examples of results**" above were drawn using this function. 
 
-Furthermore, the operator `[]` is oveloaded as accessor and mutator such that the derived class can directly index the `mst` vector of `MstElement` stored in the `MST` object.
+Furthermore, the operator `[]` is oveloaded as **accessor** and **mutator** such that the derived class can directly index the `mst` vector of `MstElement` stored in the `MST` object.
 
 
 The Dijkstra-Jarnik-Prim's algorithm is implemented in the `run()` method  of `struct Prim`.  

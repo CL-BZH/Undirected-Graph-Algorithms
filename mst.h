@@ -151,7 +151,7 @@ private:
   std::vector<MstElement> mst;
   
   /*
-   * From mst creates a string that can be used bu print() or draw().
+   * From mst creates a string that can be used to print() or draw().
    * By default creates a string with line splitted by newline caratere ('\n').
    * For drawing, newlines are replaced by ','.
    */

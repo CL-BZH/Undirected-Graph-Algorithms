@@ -22,7 +22,7 @@ CXXFLAGS = -Wall -pthread -g -Wno-reorder
 CPPFLAGS += -D_PRINT_MATRIX
 
 # For tracing the MST algorithm
-CPPFLAGS += -D_TRACE_MST
+#CPPFLAGS += -D_TRACE_MST
 
 # Flag to enable/disable part of the code in main.cpp
 #CPPFLAGS += -D_TEST_RANDOM_GRAPH

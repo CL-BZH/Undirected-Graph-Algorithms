@@ -22,10 +22,15 @@ make clean
 ```bash
 make
 ```
-As can be seen in the Makefile there are some preprocessor flags for tracing.  
-_SHOW_EDGES is used to list all edges between nodes.  
-_PRINT_MATRIX is used to print the connectivity matrix (where the abscence of edge between two nodes `i` and `j` is indicated by the value `inf` at position `(i,j)` and `(j,i)`.) You need to install [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) for this.
-
+Preprocessor flags defined in Makefile:  
+* _SHOW_EDGES is used to list all edges between nodes.  
+* _PRINT_MATRIX is used to print the connectivity matrix (where the abscence of edge between two nodes `i` and `j` is indicated by the value `inf` at position `(i,j)` and `(j,i)`.) You need to install [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) for this.
+* _DEBUG_MC can be used for tracing Monte-Carlo simulations
+* _TRACE_MST is used to trace Minimum Spanning Tree algorithm
+* _TEST_RANDOM_GRAPH to enable testing random graph in main.cpp
+* _TEST_DIJKTRA to enable testing Dijkstra algorithm in main.cpp
+* _TEST_SHORTEST_PATH_MONTE_CARLO to enable running MC simulation for shortested path in main.cpp
+* _TEST_MST to enable testing Minimum Spanning Tree algorithm in main.cpp
 
 ## Usage
 

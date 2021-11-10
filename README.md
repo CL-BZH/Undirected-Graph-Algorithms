@@ -2,8 +2,15 @@
 
 This depository contains some code I wrote for the course "[C++ For C Programmers, Part A](https://www.coursera.org/learn/c-plus-plus-a)" delivered by the University of California Santa Cruz on Coursera.
 
-The purpose is to run algorithms on undirected graphs.
-Currently, Dijkstra's shortest path algorithm is implemented and it is possible to run Monte-Carlo simulation to compute an estimate of the expected shortest path length (number of nodes in the path) and an estimate of the expected shortest path cost (sum of the weights of the edges that form the path).
+The purpose is to run algorithms on undirected graphs.  
+Currently implemented algorithms are:
+* Dijkstra's shortest path algorithm  
+ It is possible to run Monte-Carlo simulation to compute an estimate of the expected shortest path length (number of nodes in the path) and an estimate of the expected shortest path cost (sum of the weights of the edges that form the path).
+* Dijkstra-Jarnik-Prim's algorithm (also known as Prim's algorithm) for computing the minimum spanning tree of a connected graph.
+
+To Do:
+* Implement Bellman-Ford algorithm *(in shortestpath.h)*
+* Implement Kruskal's algorithm *(in mst.h)*
 
 ## Compilation
 

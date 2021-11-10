@@ -21,10 +21,19 @@ CXXFLAGS = -Wall -pthread -g -Wno-reorder
 # this will automatically define _SHOW_EDGES
 CPPFLAGS += -D_PRINT_MATRIX
 
+# For tracing the MST algorithm
+CPPFLAGS += -D_TRACE_MST
+
+# Flag to enable/disable part of the code in main.cpp
+#CPPFLAGS += -D_TEST_RANDOM_GRAPH
+#CPPFLAGS += -D_TEST_DIJKTRA
+#CPPFLAGS += -D_TEST_SHORTEST_PATH_MONTE_CARLO
+CPPFLAGS += -D_TEST_MST
+
 # If you installed Eigen and want to use it for showing the connectivity matrix
 # add the line below where "path_to_eigen" is where to find Eigen
 #INCLUDES = -I/path_to_eigen/
-INCLUDES = -I../eigen/
+INCLUDES = -I../../eigen/
 
 # define library paths in addition to /usr/lib
 LFLAGS =

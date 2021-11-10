@@ -21,6 +21,8 @@
 #include <random>
 #include <cmath>
 #include <limits>
+#include <fstream>
+#include <string>
 
 #ifdef _PRINT_MATRIX
 #define _SHOW_EDGES
@@ -37,6 +39,9 @@ const std::array<double, 2> random_graph_default_range{{1.0, 10.0}};
 
 // Vertex of a graph
 struct Node {
+  
+  Node(unsigned int id=DEAD_NODE): id{id} {}
+  
   // Identification of the node in a graph
   // Integer value that can be used as index of an array
   unsigned int id{DEAD_NODE};
@@ -51,7 +56,7 @@ struct Node {
     return value > rhs.value;
   }
 
-  // Check is the node is valid
+  // Check if the node is valid
   bool exist() {
     return (id == DEAD_NODE)? false : true;
   }
@@ -85,10 +90,15 @@ struct Edge {
 };
 
 // Printing of edge information
+// The format is a triple (i, j, cost) where i and j identify the nodes
+// and cost is the edge's weight.
+// Example, the printed line below
+// 2 5 9.5
+// means that there is an edge between nodes 2 and 5 with a cost of 9.5
 std::ostream& operator<<(std::ostream& out, const Edge& edge) {
-  out << "index: " << edge.index << " -> Edge nodes: ";
-  out << '(' << edge.nodes[0] << ',' << edge.nodes[1] << ')';
-  out << ", weight: " << edge.weight;
+  const Node& n1{edge.nodes[0]};
+  const Node& n2{edge.nodes[1]};
+  out << n1 << ' ' << n2 << ' ' << edge.weight;
   return out;
 }
 
@@ -98,6 +108,51 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
  */
 struct Graph {
 
+  /*
+   * Build the graph from reading it from file.
+   * The expected format of the file is:
+   * On the first line: the graph size
+   * On following lines: triple (i, j, cost) where i and j identify the nodes
+   * and cost is the edge's weight.
+   * Example, suppose the first 4 lines of the file are:
+   * 20
+   * 2 5 9.5
+   * 2 7 1
+   * 4 9 10.3
+   * Then it means that the graph is of size 20, there is an edge between nodes
+   * 2 and 5 with a cost of 9.5, an edge between nodes 2 and 7 with a cost of 1,
+   * an edge between nodes 4 and 9 with a cost of 10.3. 
+   */
+  Graph(const std::string& fname) {
+    std::ifstream ifs(fname, std::ios_base::in );
+    if(!ifs) {
+      std::cerr << "Failed to open for reading file " << fname << std::endl;
+      exit(1);
+    }
+    // Set the graph's name to the file's name
+    name = fname;
+    
+    std::string line;
+    unsigned int size;
+    // Read the first line to get the graph's size
+    ifs >> size;
+    // Update the number of nodes and the graph's maximum size
+    vertices = size;
+    max_edges = (size * (size - 1)) / 2;
+    // Prepare the storage of weights (represents the connectivity matrix)
+    weights.resize(max_edges, INFINITE_VALUE);
+
+    // Read each line of the file and update the connectivity matrix
+    unsigned int node_1, node_2;
+    double weight;
+    while(ifs >> node_1 >> node_2 >> weight) {
+      Node nodes[2]{{node_1}, {node_2}};
+      //std::cout << nodes[0].id << " " << nodes[1].id << " " << weight << std::endl;
+      add_edge(nodes[0], nodes[1], weight);
+    }
+    ifs.close();   
+  }
+  
   /*
    * Construct an undirected graph with no edge (set edges' weights to infinity)
    * For such a graph of size s, there can be a maximum of s(s-1)/2 edges (we
@@ -171,13 +226,15 @@ struct Graph {
   // Get the value associated to the edge between two nodes
   // (returns infinity if there is no edge)
   double get_edge_value(const Node& n1, const Node& n2) const {
-    if(n1.id == n2.id)
+    return get_edge_value(n1.id, n2.id);
+  }
+  double get_edge_value(unsigned int n1_id, unsigned int n2_id) const {
+    if(n1_id == n2_id)
       return INFINITE_VALUE;
-    
-    unsigned int index = get_index(n1, n2);
+    unsigned int index = get_index(n1_id, n2_id);
     return weights[index];
   }
-    
+  
   // Get the number of vertices in the graph
   unsigned int V() const {
     return vertices;
@@ -189,12 +246,17 @@ struct Graph {
   }
   
   // Tests whether there is an edge between node n1 and node n2
-  bool adjacent(const Node& n1, const Node& n2, double *distance=nullptr) const {
-    if(n1.id == n2.id) {
+  bool adjacent(const Node& n1, const Node& n2,
+		double *distance=nullptr) const {
+    return adjacent(n1.id, n2.id, distance);
+  }
+  bool adjacent(unsigned int n1_id, unsigned int n2_id,
+		double *distance=nullptr) const {
+    if(n1_id == n2_id) {
       return false;
     }
     
-    unsigned int index = get_index(n1, n2);
+    unsigned int index = get_index(n1_id, n2_id);
 
     double weight{weights[index]};
     
@@ -206,26 +268,73 @@ struct Graph {
     return false;
   }
   
-  // List all nodes n_i such that there is an edge from node n_1 to n_i
+  // List all nodes n_i id such that there is an edge from node n_1 to n_i
   // and give their distances
   void get_neighbors(const Node& n1,
 		     std::vector<std::pair<Node,double>>& neighbors) const {
-    // Read the list of index
+    // Neighbor node
     Node n_i;
+    // Distance to the neighbor node
     double distance;
-    unsigned int neighbor_count{0};
 
     for(unsigned int i = 0; i < vertices; i++) {
       n_i.id = i;
       if (adjacent(n1, n_i, &distance)) {
-	std::pair<Node,double> neighbor{n_i, distance};		      
+	std::pair<Node, double> neighbor{n_i, distance};
+	// Copy this neighbor in the neighbors list
 	neighbors.push_back(neighbor);
-	neighbor_count++;
       }
     }
-    //std::cout << "Node " << n1.id << " has " << neighbor_count << " neighbor" << std::endl;
+  }
+  void get_neighbors(const Node& n1,
+		     std::vector<std::pair<unsigned int, double>>& neighbors) const {
+    get_neighbors(n1.id, neighbors);
+  }
+  void get_neighbors(unsigned int n1_id,
+		     std::vector<std::pair<unsigned int, double>>& neighbors) const {
+    double distance;
+
+    // Read the list of index and find adjacent nodes
+    for(unsigned int i{0}; i < vertices; ++i) {
+      unsigned int ni_id{i};
+      if (adjacent(n1_id, ni_id, &distance)) {
+	std::pair<unsigned int,double> neighbor{i, distance};		      
+	neighbors.push_back(neighbor);
+      }
+    }
   }
 
+  // Find a node closest neighbor and returns its id.
+  // (returns DEAD_NODE if there is no neighbor)
+  unsigned int get_closest_neighbor(const Node& node,
+				    double *distance=nullptr) const {
+    return get_closest_neighbor(node.id);
+  }
+  unsigned int get_closest_neighbor(unsigned int n1_id,
+				    double *distance=nullptr) const {
+    // Id of the closest neighbor
+    unsigned int closest{DEAD_NODE};
+    // Distance to the closest neighbor
+    double min_distance{INFINITE_VALUE};
+    // Neighbor id
+    unsigned int ni_id;
+
+    // Read the list of index find the closest node among all neighbors
+    for(unsigned int id{0}; id < vertices; id++) {
+      ni_id = id;
+      double d;
+      if (adjacent(n1_id, ni_id, &d)) {
+	if(d < min_distance) {
+	  min_distance = d;
+	  closest = ni_id;
+	}
+      }
+    }
+    if (distance != nullptr)
+      *distance = min_distance;
+    return closest;
+  }
+  
   // Get an access to the edges weights
   const std::vector<double>& get_weights() const {
     return weights;
@@ -257,7 +366,7 @@ struct Graph {
   }
 
   // Return the maximum number of edge that are possible to create in the graph
-  unsigned int get_max_edges() {
+  unsigned int get_max_edges() const {
     return max_edges;
   }
 
@@ -266,18 +375,25 @@ struct Graph {
   double get_density() {
     return static_cast<double>(E())/get_max_edges();
   }
+
+  // For printing the graph in the following format:
+  // first line: size of the graph (i.e. number of nodes)
+  // on each line below print the edge information (see operator << in Edge) 
+  friend std::ostream& operator<<(std::ostream& out, const Graph& graph);
+
+  // For reading a file to initialize a graph
   
 private:
   
   // Maximum number of edges possible in the undirected graph
   // (that is the number of edges of a fully connected graph of the same size)
-  const unsigned int max_edges;
+  /*const*/ unsigned int max_edges;
 
   // Actual number of edges in the graph
   unsigned int edges{};
   
   // Number of node in the graph
-  const unsigned int vertices;
+  /*const*/ unsigned int vertices;
   
   // Connection matrix represented as an array (since it is an undirectionnal graph
   // with no node connected to itself, the array takes less than half the size
@@ -296,28 +412,27 @@ private:
   double avg_distance{INFINITE_VALUE};
   
   // Optional: give a name to the graph (default is "NO_NAME")
-  const std::string name;
+  /*const*/ std::string name;
   
   // Compute index from nodes id. Then the weight of edge between the 2 nodes
   // is given by weights[index].
   unsigned int get_index(const Node& n1, const Node n2) const {
-    if(n1.id == n2.id)
+    return get_index(n1.id, n2.id);
+  }
+  unsigned int get_index(unsigned int n1_id, unsigned int n2_id) const {
+    if(n1_id == n2_id)
       throw std::runtime_error{"There is no edge from one node to itself"};
-    // Since we store only the lower triangular part of the connectivity matrix
-    // we may need to exchange the row and column index.
-    unsigned int i = n1.id;
-    unsigned int j = n2.id;
-    if(n2.id > n1.id) {
-      i = n2.id;
-      j = n1.id;
+    // Since we store only the lower triangular part of the connectivity
+    // matrix we may need to exchange the row and column index.
+    unsigned int i = n1_id;
+    unsigned int j = n2_id;
+    if(n2_id > n1_id) {
+      i = n2_id;
+      j = n1_id;
     }
     return ((i - 1)*i)/2 + j;
   }
 
-  #ifdef _SHOW_EDGES
-  // This is just used for visualization of edges
-  std::vector<Edge> edges_listing;
-  
   // Get id of nodes forming a given edge
   void get_edge_nodes(unsigned int index, Node (&nodes)[2]) const {
     unsigned int i = static_cast<unsigned int>((1 + sqrt(1 + 8*index)) / 2);
@@ -325,9 +440,34 @@ private:
     nodes[0].id = i;
     nodes[1].id = j;
   }
+  
+  #ifdef _SHOW_EDGES
+  // This is just used for visualization of edges
+  std::vector<Edge> edges_listing;
   #endif
   
 };
+
+std::ostream& operator<<(std::ostream& out, const Graph& graph) {
+  Node nodes[2];
+  const std::vector<double>& graph_weights{graph.get_weights()};
+  
+  // Print the graph size (i.e. number of vertices)
+  std::cout << graph.V() << std::endl;
+
+  // Print all edges
+  for(unsigned int idx{0}; idx < graph.get_max_edges(); ++idx) {
+    double weight{graph_weights[idx]};
+    if(weight != INFINITE_VALUE) {
+      graph.get_edge_nodes(idx, nodes);
+      Edge e{idx, nodes, weight};
+      std::cout << e << std::endl;
+    }
+  }
+
+  return out;
+}
+
 
 /*
  * Undirected random graph class.

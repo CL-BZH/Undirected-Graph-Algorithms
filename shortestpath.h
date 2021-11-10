@@ -184,7 +184,7 @@ private:
 	continue;
 
       // Visite each neighbor
-      std::vector<std::pair<Node,double>> neighbors;
+      std::vector<std::pair<Node, double>> neighbors;
       graph->get_neighbors(current_node, neighbors);
       if(neighbors.size() == 0) {
 	std::cout << "Node " << current_node.id << " has no neighbor" << std::endl;

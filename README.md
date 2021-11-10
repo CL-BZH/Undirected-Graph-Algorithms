@@ -1,3 +1,10 @@
+<style
+  type="text/css">
+h2 {color:red;}
+h3 {color:lime;}
+#p {color:blue;}
+</style>
+
 # Undirected Graph Algorithms
 
 This depository contains some code I wrote for the course "[C++ For C Programmers, Part A](https://www.coursera.org/learn/c-plus-plus-a)" delivered by the University of California Santa Cruz on Coursera.
@@ -26,7 +33,8 @@ _PRINT_MATRIX is used to print the connectivity matrix (where the abscence of ed
 ./spmc
 ```
 
-## Example of results
+## Examples of results
+### Monte-Carlo simulation for shortest path
 Below are results obtained when running a Monte-Carlo simulation for estimating the expected shortest path length and cost of a random undirected graph using Dijkstra algorithm.  
 Graphs of size 50 were used with density of 0.2 and of 0.4 respectively. The range for the edges' weights is [1.0, 10.0].  
 Each test ran 100 simulations in parallele using 4 threads.
@@ -70,20 +78,42 @@ Estimation of the variance of the mean distance: 0.0251515
 
 ```
 
+### Minimum Spanning Tree
+An example on how to run the Prim's algorithm on an undirect graph can be seen in main.cpp.  
+Below is the result when the test is performed on the graph described in file `mst_test.txt` that can be found in the `Test` directory.  
+The graph looks like this:  
+![mst_test.txt](./Images/mst_test.png "Graph on which MST algo is run")  
+And the minimum spanning trees obtained taking node 0, 1, 2, 3 and 4 as root respectively are these:  
+*(one can see that as expected the sum of weights is always the same)*  
+![mst_test.txt](./Images/mst_test_mst_root_0.png "Graph on which MST algo is run")
+![mst_test.txt](./Images/mst_test_mst_root_1.png "Graph on which MST algo is run")
+![mst_test.txt](./Images/mst_test_mst_root_2.png "Graph on which MST algo is run")
+![mst_test.txt](./Images/mst_test_mst_root_3.png "Graph on which MST algo is run")
+![mst_test.txt](./Images/mst_test_mst_root_4.png "Graph on which MST algo is run")  
+
 ## Code details
-The code is splitted in four files:
+The C++ code is splitted in four files:
 
 * <span style="color:lime">graph.h</span>
 * <span style="color:lime">shortestpath.h</span>
 * <span style="color:lime">montecarlo.h</span>
 * <span style="color:lime">shortestpathmontecarlo.h</span>
+* <span style="color:lime">dfs.h</span>
+* <span style="color:lime">mst.h</span>
+* <span style="color:lime">trace.h</span>
 * <span style="color:lime">main.cpp</span>
 
-The undirected graph is defined in graph.h.  
-The algorithms for shortest path are implemented in shortestpath.h.  
-montecarlo.h defines the generic interface for running Monte-Carlo simulation.  
-shortestpathmontecarlo.h implements the Monte-carlo simulation for shortest path algorithms.  
-main.cpp just shows example on how to run the algorithms and the Monte-carlo simulation.
+There is also a `Tools` directory with some tools in Python for plotting graphs and trees (Python igraph needs to be installed to be able to use these tools).  
+The Test directory contains text files describing graphs. These files' path can be passed to Graph to initialized a graph (see an example on how to do that in main.cpp).
+
+Code for *(random)* undirected graph is in `graph.h`.  
+The algorithms for shortest path are implemented in `shortestpath.h`.  
+`montecarlo.h` defines the generic interface for running Monte-Carlo simulation.  
+`shortestpathmontecarlo.h` implements the Monte-carlo simulation for shortest path algorithms.  
+The algorithms for Depth First Search can be found in `dfs.h`.
+In `mst.h` is the code for building Minimum Spanning Trees from undirected connected graphs.  
+In `trace.h` a simple class for tracing is defined *(it is used in mst.h.)*.  
+`main.cpp` just shows examples on how to run the algorithms and the Monte-carlo simulation.
 
 Let's detail the content of each files.  
 
@@ -91,7 +121,7 @@ Let's detail the content of each files.
 > Note: since I prefer to have the public elements of a class at the beginning of the class I use "struct" keyword instead of "class".
 
 ---
-### <span style="color:lime">graph.h</span>
+### graph.h
 
 This file contains all the definitions needed for undirected graphs:  
 * `struct Node`
@@ -101,7 +131,8 @@ This file contains all the definitions needed for undirected graphs:
 
 `struct Nodes` defines the vertices of a graph.
 A node that belongs to a graph is located in the graph by its id, an unsigned integer that is use to index an array. It can also have a value assigned by an algorithm using the graph.  
-The '<<' operator is overloaded to print node's information.
+The '<<' operator is overloaded to print node's information.  
+The comparison operator '>' is overloaded such that the node can be stored in a priority queue ordered according to the node's value given by the algorithm running on the graph.
 
 `struct Edge` defines the edges of the graph.  
 An edge has an index that uniquely identifies the two nodes that can be linked by the edge (see below).  
@@ -189,9 +220,13 @@ while edge_count++ < edges:
     //Rebuild the list of available edges' indexes removing the selected one
     available_edges = [0,..., k - 1] + [k + 1, ..., max_edges - 1]
 ```  
-
+> Nota Bene:  
+The graph object does not store any node but only the relations
+between nodes *(i.e. the edges weights)*.  
+It is up to the application using the graph to instantiate nodes *(see `mst.h` for example)*.
+      
 ---
-### <span style="color:lime">shortestpath.h</span>
+### shortestpath.h
 This file contains all the definitions for the shortest path algoritms.
 Currently only Dijkstra's algorithm is implemented *(Bellman-Ford algorithm is in the TODO list...)*  
 
@@ -214,7 +249,7 @@ virtual void compute_path(Path& path) = 0;
 `compute_path()` in `struct DijkstraShortestPath` implement the Dijkstra algorithm. When a shortest path between two nodes is found it is added to the known path for memoization *(i.e. `struct DijkstraShortestPath` can be used for dynamic programming)*.  
 
 ---
-### <span style="color:lime">montecarlo.h</span>
+### montecarlo.h
 This file contains the generic definition for running a Monte-Carlo simulation:
 * `template <typename T>  struct MonteCarlo`
 
@@ -226,11 +261,60 @@ The base structure `Stats` can be inherited by the derived class (e.g ShortestPa
 `std::cout` is deactivated when running the simulation but the preprocessor flag _DEBUG_MC *(see Makefile)* can be used to get some trace (e.g. number of thread spawn, number of run per thread, etc.)
 
 ---
-### <span style="color:lime">shortestpathmontecarlo.h</span>
+### shortestpathmontecarlo.h
 This file contains the definition for running a Shortest Path Monte-Carlo simulation aimed at computing an estimate of the espected shortest path length and cost of an undirected graph:
 * `struct ShortestPathMonteCarlo: MonteCarlo<ShortestPath>`
 
 This is where the real workload for the threads running the Monte-Carlo simulation is defined (i.e. `thread_work()` is overridden).
+
+---
+### dfs.h
+This find contains the object definition to run Depth First Search algorithm on a graph.  
+It can be used for example to check if a graph is connected since for a connected graph the number of visited nodes should be equal to the number of vertices *(see main.cpp)*.
+
+---
+### mst.h
+This find contains the object definition to run Minimum Spanning Tree algorithm on a connected graph.  
+The four objects' types defined in that file are:
+* `struct MstElement` 
+* `struct MST`
+* `struct Prim: MST`
+* `struct Kruskal: MST`
+
+The base class called `MST` is generic and defines the interface for real implementation of the minimum spanning tree algorithms.   
+Hence `run()` is a pure virtual function. It takes as argument the id of the node to set as root for the spanning tree *(by default it is node 0)*.
+So far only the Dijkstra-Jarnik-Prim's algorithm is implemented (see the override of `run()` in `struct Prim`).
+
+The `MST` methods are:
+* `set_root()`  
+Can be used to set the minimum spanning tree root node *(by default it's node 0)*.
+* `get_neighbors()`  
+To obtain all neighbors of a given node *(and the weights of the edges)*.  
+* `print()`  
+To print the minimum spanning tree with the following format:
+    * First line: nb of vertice
+    * Other lines: edge weight  
+    where edge is of the form `n1 n2` the ids of the nodes forming the edge and weight is the weight of the edge.  
+    Example:  
+    5  
+    3 &nbsp; 0 &nbsp; 6  
+    0 &nbsp; 1 &nbsp; 2  
+    ...  
+    Means a spanning tree with 5 vertices, with an edge between nodes 3 and 0 of weight 6, an edge between nodes 0 and 1 of weight 2, etc.
+* `draw()`  
+To draw the spanning tree using the Python script `draw_mst.py` *(located in the `Tools` directory)*. Minimum spanning tree in the section "**Examples of results**" above where drawn using this function. 
+
+Furthermore, the operator `[]` is oveloaded as accessor and mutator such that the derived class can directly index the `mst` object *(vector of `MstElement`)*.
+
+
+The Dijkstra-Jarnik-Prim's algorithm is implemented in the `run()` method  of `struct Prim`.  
+I use a priority queue from the STL library. The value comparison
+is done thanks to the overload of the '`>`' operator in the `Node` class *(see graph.h)*.
+For a given node id there can be more than one instance in the queue since a node is added in the queue each time it is the neighbor of the currently visited node. Therefore, each time a node is popped from the queue, we check if it is already selected. If it is the case then we just skip it.  
+The vector `node_instances_in_queue` is just there for tracing purpose.
+It helps to follow the behavior of the algorithm *(enable the flag   `_TRACE_MST` in the `Makefile`)*.  
+
+
 
 
 ## License

@@ -1,0 +1,73 @@
+from igraph import *
+import matplotlib.pyplot as plt
+
+# Create graph
+graph = Graph(directed=False)
+
+print("Enter the path to the tree file")
+
+vertices = 0
+edges = []
+weights = []
+
+with open(input(), 'r') as input_file:
+    lines = input_file.readlines()
+    lines = [line.rstrip() for line in lines]
+    vertices = lines[0]
+    #graph.add_vertices(vertices)
+    print(f"Vertices: {vertices}")
+    
+    # Collect edges and weights
+    for i, line in enumerate(lines[1:]):
+        line = line.split()
+        n1 = int(line[0])
+        n2 = int(line[1])
+        edges += [(n1, n2)]
+        weights += [int(line[2])]
+
+
+graph.add_vertices(int(vertices))        
+#print(graph)
+
+for edge, weight in zip(edges, weights):
+    print(f"{edge} -> {weight}")
+
+# Add ids and labels to vertices
+for i in range(len(graph.vs)):
+    graph.vs[i]["id"]= i
+    graph.vs[i]["label"]= str(i)
+
+# Add the edges
+graph.add_edges(edges)
+
+# Add weights and edge labels
+graph.es['weight'] = weights
+graph.es['label'] = weights
+
+visual_style = {}
+
+#out_name = "graph.png"
+
+# Set bbox and margin
+#visual_style["bbox"] = (200,200)
+visual_style["bbox"] = (650,400)
+visual_style["margin"] = 27
+
+# Set vertex colours
+visual_style["vertex_color"] = 'white'
+
+# Set vertex size
+visual_style["vertex_size"] = 25
+
+# Set vertex lable size
+visual_style["vertex_label_size"] = 18
+
+# Don't curve the edges
+visual_style["edge_curved"] = False
+
+# Set the layout
+my_layout = graph.layout_lgl()
+visual_style["layout"] = my_layout
+
+# Plot the graph
+plot(graph, **visual_style)

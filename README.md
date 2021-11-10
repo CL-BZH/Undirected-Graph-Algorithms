@@ -84,7 +84,7 @@ Estimation of the variance of the mean distance: 0.0251515
 ```
 
 ### <span style="color:lime">Minimum Spanning Tree</span>
-An example on how to run the Prim's algorithm on an undirect graph can be seen in main.cpp.  
+An example on how to run the Prim's algorithm on an undirect graph is shown in main.cpp.  
 Below is the result when the test is performed on the graph described in file `mst_test.txt` that can be found in the `Test` directory.  
 The graph looks like this:  
 ![mst_test.txt](./Images/mst_test.png "Graph on which MST algo is run")  
@@ -109,7 +109,7 @@ The C++ code is splitted in four files:
 * <span style="color:lime">main.cpp</span>
 
 There is also a `Tools` directory with some tools in Python for plotting graphs and trees (Python igraph needs to be installed to be able to use these tools).  
-The Test directory contains text files describing graphs. These files' path can be passed to Graph to initialized a graph (see an example on how to do that in main.cpp).
+The `Test` directory contains text files describing graphs. These files' path can be passed to Graph to initialized a graph (see an example on how to do that in main.cpp).
 
 Code for *(random)* undirected graph is in `graph.h`.  
 The algorithms for shortest path are implemented in `shortestpath.h`.  
@@ -136,13 +136,13 @@ This file contains all the definitions needed for undirected graphs:
 
 `struct Nodes` defines the vertices of a graph.
 A node that belongs to a graph is located in the graph by its id, an unsigned integer that is use to index an array. It can also have a value assigned by an algorithm using the graph.  
-The '<<' operator is overloaded to print node's information.  
-The comparison operator '>' is overloaded such that the node can be stored in a priority queue ordered according to the node's value given by the algorithm running on the graph.
+The '`<<`' operator is overloaded to print node's information.  
+The comparison operator '`>`' is overloaded such that the node can be stored in a priority queue ordered according to the node's value given by the algorithm running on the graph.
 
 `struct Edge` defines the edges of the graph.  
 An edge has an index that uniquely identifies the two nodes that can be linked by the edge (see below).  
 An edge has a weight which is set to ***infinity*** (`std::numeric_limits<double>::infinity()`) when there is no edge between the two nodes.  
-The '<<' operator is overloaded to print edge's information.  
+The '`<<`' operator is overloaded to print edge's information.  
 
 `struct Graph` defines an undirected (weighted) graph.  
 The copy constructor and assignment are deleted so that we don't fill the memory with copy of a graph on which instances of an algorithm would run in parallel.  
@@ -226,7 +226,7 @@ while edge_count++ < edges:
     available_edges = [0,..., k - 1] + [k + 1, ..., max_edges - 1]
 ```  
 > Nota Bene:  
-The graph object does not store any node. It stores only the topology of the graph *(i.e. weight of edges between nodes - with infinite meaning no edge)*.  
+The graph object does not store any node. It defines only the topology of the graph *(i.e. weights of edges between nodes - with infinite value meaning no edge)*.  
 It is up to the application using the graph to instantiate nodes *(see `mst.h` for example)*.
       
 ---
@@ -248,9 +248,9 @@ Since it is an interface the functions for computing a shortest path are pure vi
 virtual std::unique_ptr<ShortestPath> clone(const Graph& graph) const = 0;
 virtual void compute_path(Path& path) = 0;
 ```
-`struct DijkstraShortestPath` and `struct BellmanFordShortestPath` inherite from `struct ShortestPath` and overrides the functions `clone()` and `compute_path()`.
+`struct DijkstraShortestPath` and `struct BellmanFordShortestPath` inherite from `struct ShortestPath` and override the functions `clone()` and `compute_path()`.
 
-`compute_path()` in `struct DijkstraShortestPath` implement the Dijkstra algorithm. When a shortest path between two nodes is found it is added to the known path for memoization *(i.e. `struct DijkstraShortestPath` can be used for dynamic programming)*.  
+`compute_path()` in `struct DijkstraShortestPath` implements the Dijkstra algorithm. When a shortest path between two nodes is found it is added to the known path for memoization *(i.e. `struct DijkstraShortestPath` can be used for dynamic programming)*.  
 
 ---
 ### <span style="color:lime">montecarlo.h</span>
@@ -262,7 +262,7 @@ It is a template where `T` is used to set the algorithm (example `ShortestPath`)
 It supports multi-threading and the thread's workload is *defined* by the pure virtual function `thread_work()`.  
 The base structure `Stats` can be inherited by the derived class (e.g ShortestPathMonteCarlo::Stats) and provides lock mechanism *(mutex)* for the threads to update the statistics computed in the derived class.
 
-`std::cout` is deactivated when running the simulation but the preprocessor flag _DEBUG_MC *(see Makefile)* can be used to get some trace (e.g. number of thread spawn, number of run per thread, etc.)
+`std::cout` is deactivated when running the simulation but the preprocessor flag _DEBUG_MC *(see Makefile)* can be used to get some traces (e.g. number of thread spawn, number of run per thread, etc.)
 
 ---
 ### <span style="color:lime">shortestpathmontecarlo.h</span>
@@ -285,11 +285,11 @@ The four objects' types defined in that file are:
 * `struct Prim: MST`
 * `struct Kruskal: MST`
 
-An `MST` object is a vector of `MstElement` of size the size of the graph. This is where the nodes of the graph are instatiated *(remember a graph object defines only the topology of a graph)*.  
+An `MST` object has a vector of `MstElement` of size the number of vertices in the graph. This is where the nodes of the graph are instatiated *(remember a graph object defines only the topology of a graph)*.  
 So, an `MstElement` stores a pointer to a node *(nodes are created on the heap)* and a boolean telling if the node was selected. It also has a field to store the id of its parent. The value given to the node by the algorithm is stored in the node itself *(see `Node` class in `graph.h`)*.  
 The `MstElement` class also overload the '`>`' operator so that pointers to MST's elements can be compared by the STL priority queue.  
 The base class called `MST` is generic and defines the interface for real implementation of the minimum spanning tree algorithms.   
-Hence `run()` is a pure virtual function. It takes as argument the id of the node to set as root for the spanning tree *(by default it is node 0)*.
+Hence `run()` is a pure virtual function. It takes as argument the id of the node to set as root for the spanning tree *(by default it is node 0)*.  
 So far only the Dijkstra-Jarnik-Prim's algorithm is implemented (see the override of `run()` in `struct Prim`).
 
 The `MST` methods are:
@@ -299,26 +299,27 @@ Can be used to set the root node *(by default it's node 0)* of the minimum spann
 To obtain all neighbors of a given node *(and the weights of the edges)*.  
 * `print()`  
 To print the minimum spanning tree with the following format:
-    * First line: nb of vertice
-    * Other lines: edge weight  
-    where edge is of the form `n1 n2` the ids of the nodes forming the edge and weight is the weight of the edge.  
+    * First line: `nb_of_vertices`
+    * Other lines: `edge` `weight`  
+    Where `nb_of_vertices` is the size of the graph and where `edge` is of the form `n1 n2`, with `n1` and `n2` being the ids of the nodes forming the edge and `weight` is the weight of the edge.  
     Example:  
     5  
     3 &nbsp; 0 &nbsp; 6  
     0 &nbsp; 1 &nbsp; 2  
     ...  
-    Means:  
+    means:  
          a spanning tree with 5 vertices, with an edge between nodes 3 and 0 of weight 6, an edge between nodes 0 and 1 of weight 2, etc.
 
 * `draw()`  
-To draw the spanning tree using the Python script `draw_mst.py` *(located in the `Tools` directory)*. Minimum spanning tree in the section "**Examples of results**" above where drawn using this function. 
+To draw the spanning tree using the Python script `draw_mst.py` *(located in the `Tools` directory)*.  
+Minimum spanning trees in the section "**Examples of results**" above where drawn using this function. 
 
-Furthermore, the operator `[]` is oveloaded as accessor and mutator such that the derived class can directly index the `mst` object *(vector of `MstElement`)*.
+Furthermore, the operator `[]` is oveloaded as accessor and mutator such that the derived class can directly index the `mst` vector of `MstElement` stored in the `MST` object.
 
 
 The Dijkstra-Jarnik-Prim's algorithm is implemented in the `run()` method  of `struct Prim`.  
 I use a priority queue from the STL library. The value comparison
-is done thanks to the overload of the '`>`' operator in the `Node` class *(see graph.h)*.  
+is done thanks to the overload of the '`>`' operator in the `Node` class *(see `graph.h`)*.  
 For a given node id there can be, in the priority queue, more than one pointer to the element pointing to that node. That is because each time the neighbor of the currently visited node gets a lower cost, the element pointer that points to that node is added in the queue so that this neighbor node has a higher priority in the queue. Therefore, each time an element pointer is popped from the queue, we check if the element was already selected. If it is the case it means that it is an old pointer and then we just skip it.  
 The vector `node_instances_in_queue` is just there for tracing purpose.
 It helps to follow the behavior of the algorithm *(enable the flag   `_TRACE_MST` in the `Makefile`)*.  

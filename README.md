@@ -109,7 +109,7 @@ The C++ code is splitted in eight files:
 * <span style="color:lime">main.cpp</span>
 
 There is also a `Tools` directory with some tools in `Python` for plotting graphs and trees (Python `igraph` needs to be installed to be able to use these tools).  
-The `Test` directory contains text files describing graphs. These files' path can be passed to Graph to initialized a graph (see an example on how to do that in `main.cpp`).
+The `Test` directory contains text files describing graphs. These files' path can be passed to Graph to initialize a graph (see an example on how to do that in `main.cpp`).
 
 Code for *(random)* undirected graph is in `graph.h`.  
 The algorithms for shortest path are implemented in `shortestpath.h`.  
@@ -286,7 +286,7 @@ The four objects' types defined in that file are:
 * `struct Prim: MST`
 * `struct Kruskal: MST` *(Not complete)*
 
-An `MST` object has a vector of `MstElement` that is of size the number of vertices in the graph. This is where the nodes of the graph are instatiated *(remember a graph object defines only the topology of a graph)*.  What is stored in the priority queue are pointers to these elements.  
+An `MST` object has a vector of `MstElement` that is of size the number of vertices in the graph. This is where the nodes of the graph are instatiated *(remember a graph object defines only the topology of a graph)*.  **What is stored in the priority queue are pointers to these elements**.  
 So, an `MstElement` stores a pointer to a node *(nodes are created on the heap)* and a boolean telling if the node was selected. It also has a field to store the id of its parent. The value given to the node by the algorithm is stored in the node itself *(see `Node` class in `graph.h`)*.  
 The `MstElement` class also overload the '`>`' operator so that MST's elements can be compared by the STL priority queue.   
 The base class called `MST` is generic and defines the interface for real implementation of the minimum spanning tree algorithms.   

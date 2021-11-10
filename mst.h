@@ -79,7 +79,7 @@ struct MST {
 
   /*
    * Generate a command for the Python script draw_mst.py in Tools
-   * draw the tree (Python igrap has to be installed)
+   * and call the script to draw the tree (Python igrap needed)
    */
   void draw() {
     std::string str;
@@ -179,7 +179,7 @@ private:
 
 /*
  * Structure for Dijkstra-Jarnik-Prim's algorithm
- * (also known as Prim's algorythm)
+ * (also known as Prim's algorithm)
  */
 struct Prim: MST {
   

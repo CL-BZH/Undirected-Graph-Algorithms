@@ -1,10 +1,3 @@
-<style
-  type="text/css">
-h2 {color:red;}
-h3 {color:lime;}
-#p {color:blue;}
-</style>
-
 # Undirected Graph Algorithms
 
 This depository contains some code I wrote for the course "[C++ For C Programmers, Part A](https://www.coursera.org/learn/c-plus-plus-a)" delivered by the University of California Santa Cruz on Coursera.
@@ -34,7 +27,7 @@ _PRINT_MATRIX is used to print the connectivity matrix (where the abscence of ed
 ```
 
 ## Examples of results
-### Monte-Carlo simulation for shortest path
+### <span style="color:lime">Monte-Carlo simulation for shortest path</span>
 Below are results obtained when running a Monte-Carlo simulation for estimating the expected shortest path length and cost of a random undirected graph using Dijkstra algorithm.  
 Graphs of size 50 were used with density of 0.2 and of 0.4 respectively. The range for the edges' weights is [1.0, 10.0].  
 Each test ran 100 simulations in parallele using 4 threads.
@@ -78,7 +71,7 @@ Estimation of the variance of the mean distance: 0.0251515
 
 ```
 
-### Minimum Spanning Tree
+### <span style="color:lime">Minimum Spanning Tree</span>
 An example on how to run the Prim's algorithm on an undirect graph can be seen in main.cpp.  
 Below is the result when the test is performed on the graph described in file `mst_test.txt` that can be found in the `Test` directory.  
 The graph looks like this:  
@@ -121,7 +114,7 @@ Let's detail the content of each files.
 > Note: since I prefer to have the public elements of a class at the beginning of the class I use "struct" keyword instead of "class".
 
 ---
-### graph.h
+### <span style="color:lime">graph.h</span>
 
 This file contains all the definitions needed for undirected graphs:  
 * `struct Node`
@@ -221,12 +214,11 @@ while edge_count++ < edges:
     available_edges = [0,..., k - 1] + [k + 1, ..., max_edges - 1]
 ```  
 > Nota Bene:  
-The graph object does not store any node but only the relations
-between nodes *(i.e. the edges weights)*.  
+The graph object does not store any node. It stores only the topology of the graph *(i.e. weight of edges between nodes - with infinite meaning no edge)*.  
 It is up to the application using the graph to instantiate nodes *(see `mst.h` for example)*.
       
 ---
-### shortestpath.h
+### <span style="color:lime">shortestpath.h</span>
 This file contains all the definitions for the shortest path algoritms.
 Currently only Dijkstra's algorithm is implemented *(Bellman-Ford algorithm is in the TODO list...)*  
 
@@ -249,7 +241,7 @@ virtual void compute_path(Path& path) = 0;
 `compute_path()` in `struct DijkstraShortestPath` implement the Dijkstra algorithm. When a shortest path between two nodes is found it is added to the known path for memoization *(i.e. `struct DijkstraShortestPath` can be used for dynamic programming)*.  
 
 ---
-### montecarlo.h
+### <span style="color:lime">montecarlo.h</span>
 This file contains the generic definition for running a Monte-Carlo simulation:
 * `template <typename T>  struct MonteCarlo`
 
@@ -261,33 +253,36 @@ The base structure `Stats` can be inherited by the derived class (e.g ShortestPa
 `std::cout` is deactivated when running the simulation but the preprocessor flag _DEBUG_MC *(see Makefile)* can be used to get some trace (e.g. number of thread spawn, number of run per thread, etc.)
 
 ---
-### shortestpathmontecarlo.h
+### <span style="color:lime">shortestpathmontecarlo.h</span>
 This file contains the definition for running a Shortest Path Monte-Carlo simulation aimed at computing an estimate of the espected shortest path length and cost of an undirected graph:
 * `struct ShortestPathMonteCarlo: MonteCarlo<ShortestPath>`
 
 This is where the real workload for the threads running the Monte-Carlo simulation is defined (i.e. `thread_work()` is overridden).
 
 ---
-### dfs.h
-This find contains the object definition to run Depth First Search algorithm on a graph.  
+### <span style="color:lime">dfs.h</span>
+This file contains the object definition to run Depth First Search algorithm on a graph.  
 It can be used for example to check if a graph is connected since for a connected graph the number of visited nodes should be equal to the number of vertices *(see main.cpp)*.
 
 ---
-### mst.h
-This find contains the object definition to run Minimum Spanning Tree algorithm on a connected graph.  
+### <span style="color:lime">mst.h</span>
+This file contains the object definition to run Minimum Spanning Tree algorithm on a connected graph.  
 The four objects' types defined in that file are:
 * `struct MstElement` 
 * `struct MST`
 * `struct Prim: MST`
 * `struct Kruskal: MST`
 
+An `MST` object is a vector of `MstElement` of size the size of the graph. This is where the nodes of the graph are instatiated *(remember a graph object defines only the topology of a graph)*.  
+So, an `MstElement` stores a pointer to a node *(nodes are created on the heap)* and a boolean telling if the node was selected. It also has a field to store the id of its parent. The value given to the node by the algorithm is stored in the node itself *(see `Node` class in `graph.h`)*.  
+The `MstElement` class also overload the '`>`' operator so that pointers to MST's elements can be compared by the STL priority queue.  
 The base class called `MST` is generic and defines the interface for real implementation of the minimum spanning tree algorithms.   
 Hence `run()` is a pure virtual function. It takes as argument the id of the node to set as root for the spanning tree *(by default it is node 0)*.
 So far only the Dijkstra-Jarnik-Prim's algorithm is implemented (see the override of `run()` in `struct Prim`).
 
 The `MST` methods are:
 * `set_root()`  
-Can be used to set the minimum spanning tree root node *(by default it's node 0)*.
+Can be used to set the root node *(by default it's node 0)* of the minimum spanning tree.
 * `get_neighbors()`  
 To obtain all neighbors of a given node *(and the weights of the edges)*.  
 * `print()`  
@@ -300,7 +295,9 @@ To print the minimum spanning tree with the following format:
     3 &nbsp; 0 &nbsp; 6  
     0 &nbsp; 1 &nbsp; 2  
     ...  
-    Means a spanning tree with 5 vertices, with an edge between nodes 3 and 0 of weight 6, an edge between nodes 0 and 1 of weight 2, etc.
+    Means:  
+         a spanning tree with 5 vertices, with an edge between nodes 3 and 0 of weight 6, an edge between nodes 0 and 1 of weight 2, etc.
+
 * `draw()`  
 To draw the spanning tree using the Python script `draw_mst.py` *(located in the `Tools` directory)*. Minimum spanning tree in the section "**Examples of results**" above where drawn using this function. 
 
@@ -309,13 +306,13 @@ Furthermore, the operator `[]` is oveloaded as accessor and mutator such that th
 
 The Dijkstra-Jarnik-Prim's algorithm is implemented in the `run()` method  of `struct Prim`.  
 I use a priority queue from the STL library. The value comparison
-is done thanks to the overload of the '`>`' operator in the `Node` class *(see graph.h)*.
-For a given node id there can be more than one instance in the queue since a node is added in the queue each time it is the neighbor of the currently visited node. Therefore, each time a node is popped from the queue, we check if it is already selected. If it is the case then we just skip it.  
+is done thanks to the overload of the '`>`' operator in the `Node` class *(see graph.h)*.  
+For a given node id there can be, in the priority queue, more than one pointer to the element pointing to that node. That is because each time the neighbor of the currently visited node gets a lower cost, the element pointer that points to that node is added in the queue so that this neighbor node has a higher priority in the queue. Therefore, each time an element pointer is popped from the queue, we check if the element was already selected. If it is the case it means that it is an old pointer and then we just skip it.  
 The vector `node_instances_in_queue` is just there for tracing purpose.
 It helps to follow the behavior of the algorithm *(enable the flag   `_TRACE_MST` in the `Makefile`)*.  
 
-
-
+>Note:
+The code was checked using Valgrind and there was no memory leak.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

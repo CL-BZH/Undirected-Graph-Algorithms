@@ -1,6 +1,7 @@
 #ifndef MST_H
 #define MST_H
 
+#include <memory>
 #include <queue>
 #include <string>
 #include <sstream>
@@ -9,13 +10,25 @@
 #include "trace.h"
 
 // Element of the MST
+// Keep everything public for simplicity
 struct MstElement {
-  // Value given to a node
-  unsigned int value{DEAD_NODE};
+
+  MstElement(Node* node_ptr=nullptr): node_ptr{node_ptr} {}
+  
+  Node* node_ptr;
+  
   // Mark the node as selected once it is part of the MST
   bool selected{false};
-    // Link the node to its parent
+  
+    // Link the node to its parent. -1 means no parent.
   int parent{-1};
+
+  // Define the "is greater" operator such that the element can be stored in
+  // a priority queue ordered according to the node's value given by the
+  // MST algorithm running on the graph.
+  bool operator>(const MstElement& rhs) const {
+    return *(this->node_ptr) > *(rhs.node_ptr);
+  }
 };
 
 /*
@@ -26,10 +39,22 @@ struct MstElement {
  */
 struct MST {
   
-  MST(const Graph& graph): graph{graph}, vertices{graph.V()},
-			   mst(vertices) {}
+  MST(const Graph& graph): graph{graph}, vertices{graph.V()} {
+    // Instantiate the node of the graph (the graph is only the topology
+    // and has no 'real' node in it)
+    for(unsigned int i{0}; i < vertices; ++i) {
+      MstElement mst_elem{new Node(i)}; 
+      mst.push_back(mst_elem);
+    }
+  }
   
-  virtual ~MST() { mst.clear();};
+  virtual ~MST() {
+    // Delete node instance
+    for(unsigned int i{0}; i < vertices; ++i) {
+      delete mst[i].node_ptr;
+    }
+    mst.clear();
+  }
 
   virtual void run(unsigned int root=0 /*Id of the node to select as root*/) = 0;
 
@@ -168,79 +193,120 @@ struct Prim: MST {
     set_root(root);
     
     // Priority Queue for selecting cheapest node
-    std::priority_queue<Node, std::vector<Node>, std::greater<Node>> node_queue;
-    std::vector<Node*> nodes(graph_size(), nullptr);
-
+    // Only pointers to mst elements (store in MST::mst) are stored in the queue
+    std::priority_queue<MstElement*, std::vector<MstElement*>,
+			std::greater<MstElement*>> elements_queue;
+    
+    
     // Keep track of number of instances of each node in the queue
-    // (for tracing purpose)
+    // (for tracing purpose).
+    // Note: nodes are not really stored in the queue but only pointers
+    // to element pointing to node.
     std::vector<unsigned int> node_instances_in_queue(graph_size(), 0);
     
-    // Add the root node in the queue
-    Node node{root};
-    node.value = 0.0;
-    node_queue.push(node);
-    nodes[root] = &node;
-    
-    node_instances_in_queue[root] = 1;
-    
-    while (!node_queue.empty()) {
-      // Pop the first node in the queue (i.e the one with the lowest value)
-      Node current_node{node_queue.top().id};
-      node_queue.pop();
+    // Set the value of the root node in the MST to 0 and add it to the queue
+    MstElement* root_element_ptr{&(*this)[root]};// = &mst[root]
+    Node* root_node_ptr{root_element_ptr->node_ptr};
+    root_node_ptr->value = 0.0;
+    elements_queue.push(root_element_ptr);
 
-      node_instances_in_queue[current_node.id] -= 1;
+    // Set number of instance in the queue of pointers to the root node to 1.
+    node_instances_in_queue[root] = 1;
+
+    trace << "\tAdd pointer to element pointing to the root node (id " << root;
+    trace << ") to queue with updated value " << root_node_ptr->value;
+    trace();
+	  
+    while (!elements_queue.empty()) {
+      // Pop the first node in the queue (i.e the one with the lowest value)
+      MstElement* current_element_ptr{elements_queue.top()};
+      Node* current_node_ptr{current_element_ptr->node_ptr};
+      elements_queue.pop();
       
-      if ((*this)[current_node.id].selected == true) {
-	trace << "Node " << current_node.id << " already selected => skip";
+      // Id of the node currently visited
+      unsigned int current_node_id{current_node_ptr->id};
+      
+      // Decrease the number of instance of pointers to the current node
+      // that are currently stored in the queue
+      node_instances_in_queue[current_node_id] -= 1;
+      
+      if (current_element_ptr->selected == true) {
+	// See the 'Note' in the for loop below to understand why we need this
+	trace << "Node " << current_node_id << " already selected => skip";
 	trace();
 	continue;
       }
 
-      trace << "Selected node " << current_node.id;
+      trace << "Selected node " << current_node_id;
       trace();
       
-      // Mark the node as selected. i.e. mst[current_node.id].selected = true
-      (*this)[current_node.id].selected = true;
+      // Mark the node as selected. i.e. mst[current_node_id].selected = true
+      current_element_ptr->selected = true;
 
       // Get neighbors
       std::vector<std::pair<Node, double>> neighbors;
-      get_neighbors(current_node, neighbors);
-      
+      get_neighbors(*(current_node_ptr), neighbors);
+
+      // Go throught all the neighbors and check if the curremtly visited node
+      // gives a better path to that neighbor node.
       for(auto& neighbor: neighbors) {
 	unsigned int ngbr_id{neighbor.first.id};
 	double cost{neighbor.second};
-	if (!(*this)[ngbr_id].selected) {
+	MstElement* neighbor_element_ptr = &((*this)[ngbr_id]);
+	Node* neighbor_node_ptr{neighbor_element_ptr->node_ptr};
+	
+	if (!neighbor_element_ptr->selected) {
 	  // This neighbor is not yet part of the MST (avoid loop)
-	  if((*this)[ngbr_id].value > cost) {
+
+	  // Get the current value of the neighbor node and check if the
+	  // current node is a better parent
+	  double neighbor_node_value{neighbor_node_ptr->value};
+	  if(neighbor_node_value > cost) {
 	    // A better path to this node is found => update its 
-	    // parent in the tree
-	    int current_parent{(*this)[ngbr_id].parent};
-	    unsigned int new_parent{current_node.id};
+	    // parent in the tree with the id of the current node
+	    int current_parent{neighbor_element_ptr->parent};
 	    trace << "\tChange parent of node " << ngbr_id << " from ";
-	    trace <<  current_parent << " to " << new_parent;
+	    trace <<  current_parent << " to " << current_node_id;
 	    trace();
 	    
-	    (*this)[ngbr_id].parent = current_node.id;
+	    neighbor_element_ptr->parent = current_node_id;
 
-	    // Update its value in the tree and also in the neighbor since
-	    // we will add it to the queue.
-	    (*this)[ngbr_id].value = cost;
-	    neighbor.first.value = cost;
-	  }
-	  trace << "\tAdd node " << ngbr_id << " to queue with value ";
-	  trace << neighbor.first.value;
-	  trace();
-	  node_queue.push(neighbor.first);
+	    // Update its value in the tree
+	    neighbor_node_ptr->value = cost;
 
-	  // Just for tracing
-	  node_instances_in_queue[neighbor.first.id] += 1;
+	    // Note: even if the pointer to the element pointing to that neighbor
+	    // node is already in the queue we must add it again so that it has
+	    // a higher pririority. This is why we have the
+	    // "if (current_element_ptr->selected == true) then skip" at the
+	    // beginning of the loop
+	    trace << "\tAdd pointer to element pointing to node of id " << ngbr_id;
+	    trace << " to queue with value updated from " << neighbor_node_value;
+	    trace << " to " << neighbor_node_ptr->value;
+	    trace();
+	    elements_queue.push(neighbor_element_ptr);
+
+	    // Just for tracing purpose
+	    node_instances_in_queue[ngbr_id] += 1;
+	  } 
+
+	  // Just for tracing purpose
 	  for(size_t i{0}; i < node_instances_in_queue.size(); ++i) {
 	    if(node_instances_in_queue[i] > 0) {
-	      trace << "Node " << i << " is " << node_instances_in_queue[i];
-	      trace << " times in the queue";
+	      std::string s;
+	      if(node_instances_in_queue[i] == 1) {
+		trace << "There is ";
+		s = " ";
+	      } else {
+		trace << "There are ";
+		s = "s ";
+	      }
+	      trace << node_instances_in_queue[i] << " ";
+	      trace << "element's pointer" << s << "that point to node " << i;
+	      trace << " in the queue.";
 	      trace();
 	    }
 	  }
+	  
 	}
       }
     }

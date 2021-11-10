@@ -105,8 +105,8 @@ int main() {
 
 #ifdef _TEST_MST
   // Build a graph from file
-  //Graph tree_graph{"./Test/hw3_sampletestdata_mst_data.txt"};
-  Graph tree_graph{"./Test/mst_test.txt"};
+  Graph tree_graph{"./Test/hw3_sampletestdata_mst_data.txt"};
+  //Graph tree_graph{"./Test/mst_test.txt"};
   
   // Use DFS to check if the graph is connected
   std::map<unsigned int, bool> visited;
@@ -129,7 +129,7 @@ int main() {
 
   // Run Dijkstra-Jarnik-Prim algorithm
   Prim djp{tree_graph};
-  unsigned int root{1};
+  unsigned int root{0};
   djp.run(root);
   djp.print();
   djp.draw();

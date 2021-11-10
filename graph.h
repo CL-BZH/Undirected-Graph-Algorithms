@@ -105,6 +105,10 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
 /*
  * Undirected weighted graph class
  * We consider undirected graph where nodes have no edge to themself.
+ * Nota bene:
+ * The graph object does not store any node. It stores only the topology of the graph
+ * (i.e. weight of edges between nodes - with infinite meaning no edge)
+ * 
  */
 struct Graph {
 

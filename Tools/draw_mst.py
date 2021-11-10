@@ -43,8 +43,8 @@ visual_style = {}
 #out_name = "graph.png"
 
 # Set bbox and margin
-#visual_style["bbox"] = (650, 400)
-visual_style["bbox"] = (200, 200)
+visual_style["bbox"] = (650, 400)
+#visual_style["bbox"] = (200, 200)
 visual_style["margin"] = 27
 
 # Set vertex colours

@@ -116,7 +116,8 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
  * (i.e. weight of edges between nodes - with infinite meaning no edge)
  * 
  */
-struct Graph {
+template <typename = void*>
+struct Graph_T {
 
   /*
    * Build the graph from reading it from file.
@@ -133,7 +134,7 @@ struct Graph {
    * 2 and 5 with a cost of 9.5, an edge between nodes 2 and 7 with a cost of 1,
    * an edge between nodes 4 and 9 with a cost of 10.3. 
    */
-  Graph(const std::string& fname) {
+  Graph_T(const std::string& fname) {
     std::ifstream ifs(fname, std::ios_base::in );
     if(!ifs) {
       std::cerr << "Failed to open for reading file " << fname << std::endl;
@@ -168,7 +169,7 @@ struct Graph {
    * For such a graph of size s, there can be a maximum of s(s-1)/2 edges (we
    * considered that no node has an edge to itself).
    */
-  Graph(unsigned int size=graph_default_size, std::string name="NO_NAME"):
+  Graph_T(unsigned int size=graph_default_size, std::string name="NO_NAME"):
     name{name}, vertices{size}, max_edges{(size * (size - 1)) / 2},
     weights(max_edges, INFINITE_VALUE) {
       if(size < 2)
@@ -178,18 +179,18 @@ struct Graph {
     }
 
   // Initialization from another graph is done with 'move' not 'copy'
-  Graph(const Graph&) = delete;
+  Graph_T(const Graph_T<>&) = delete;
 
-  Graph(const Graph&& graph) noexcept:
+  Graph_T(const Graph_T<>&& graph) noexcept:
     name{graph.name}, vertices{graph.V()}, edges{graph.E()},
     max_edges{(vertices * (vertices - 1)) / 2},
     weights{graph.get_weights()} {}
 
   
   // Assigment is done with 'move' not 'copy'
-  Graph& operator=(const Graph&) = delete;
+  Graph_T<>& operator=(const Graph_T<>&) = delete;
 
-  Graph& operator=(Graph&& graph) noexcept {
+  Graph_T<>& operator=(Graph_T<>&& graph) noexcept {
     return *this;
   }
 
@@ -413,7 +414,7 @@ struct Graph {
   // For printing the graph in the following format:
   // first line: size of the graph (i.e. number of nodes)
   // on each line below print the edge information (see operator << in Edge) 
-  friend std::ostream& operator<<(std::ostream& out, const Graph& graph);
+  friend std::ostream& operator<<(std::ostream& out, const Graph_T<>& graph);
 
   // For reading a file to initialize a graph
 #endif
@@ -465,7 +466,7 @@ private:
 };
 
 #ifdef _SHOW_EDGES
-std::ostream& operator<<(std::ostream& out, const Graph& graph) {
+std::ostream& operator<<(std::ostream& out, const Graph_T<>& graph) {
   Node nodes[2];
   const std::vector<double>& graph_weights{graph.get_weights()};
   
@@ -486,6 +487,7 @@ std::ostream& operator<<(std::ostream& out, const Graph& graph) {
 }
 #endif //_SHOW_EDGES
 
+using Graph = Graph_T<>;
 
 /*
  * Undirected colored graph class.
@@ -615,9 +617,10 @@ private:
  * Undirected random graph class.
  * An undirected random graph IS a undirected graph, hence the inheritance.
  */
-struct RandomGraph: Graph {
+template <typename = void*>
+struct RandomGraph_T: Graph {
 
-  RandomGraph(unsigned int size=graph_default_size,
+  RandomGraph_T(unsigned int size=graph_default_size,
 	      double density=random_graph_default_density,
 	      const std::string& name="NO_NAME",
 	      std::array<double, 2> range=random_graph_default_range):
@@ -700,5 +703,7 @@ private:
   }
 
 };
+
+using RandomGraph = RandomGraph_T<> ;
 
 #endif //GRAPH_H

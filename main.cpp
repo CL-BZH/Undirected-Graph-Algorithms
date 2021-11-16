@@ -50,7 +50,7 @@ int main() {
   ugraph.show();
   #endif
   
-  DijkstraShortestPath<void, RandomGraph> dsp{ugraph};
+  DijkstraShortestPath<RandomGraph> dsp{ugraph};
   
   Node node0{5};
   Node node1{1};
@@ -82,9 +82,9 @@ int main() {
   rugraph.show();
   #endif
   
-  DijkstraShortestPath<void, RandomGraph> sp_algo{rugraph};
+  DijkstraShortestPath<RandomGraph> sp_algo{rugraph};
   
-  ShortestPathMonteCarlo<void, RandomGraph> spmc{sp_algo, graph_size, graph_density};
+  ShortestPathMonteCarlo<RandomGraph> spmc{sp_algo, graph_size, graph_density};
 
   std::cout << "Number of run "
 	    << "(Optional just press enter to get the default value of "

@@ -51,14 +51,18 @@ struct Path {
  * That is any algorithm (Dijkstra, Bellman-Ford, ...) used to compute 
  * shortest paths must comply to this interface (inheritate).
  */
-template <typename Color_t, typename Graph_t>
-struct ShortestPath {
+
+template <typename Graph_T>
+struct ShortestPath;
+
+template <template<typename> class Graph_T, typename Color_T>
+struct ShortestPath<Graph_T<Color_T>> {
   
   ShortestPath(const std::string& name=""): graph{nullptr}, name{name} {
     ++obj_count;
   }
 
-  ShortestPath(const Graph_t& graph, const std::string& name=""):
+  ShortestPath(const Graph_T<Color_T>& graph, const std::string& name=""):
     graph{&graph}, name{name} {
     ++obj_count;
   }
@@ -69,25 +73,25 @@ struct ShortestPath {
 
   // Enable the copy of the derived class such that computation can be run
   // in parallell by multiple threads.
-  virtual std::unique_ptr<ShortestPath<Color_t, Graph_t>> clone(const Graph_t& graph) const = 0;
+  virtual std::unique_ptr<ShortestPath<Graph_T<Color_T>>> clone(const Graph_T<Color_T>& graph) const = 0;
   
   // Compute the shortest path between 2 nodes
   //virtual void compute_path(Path& path) = 0;
 
-  // Compute the shortest path of a given color between 2 nodes
-  virtual void compute_path(Path& path, Color_t* color=nullptr) = 0;
+  // Compute the shortest path between 2 nodes
+  virtual void compute_path(Path& path, Color_T* color=nullptr) = 0;
 
   // Get algorithm name
   const std::string get_name() {
     return name;
   };
   
-  void set_graph(const Graph_t& g) {
+  void set_graph(const Graph_T<Color_T>& g) {
     graph = &g;
     shortest_paths.clear();
   }
   
-  const Graph_t* get_graph() const {
+  const Graph_T<Color_T>* get_graph() const {
     return graph;
   }
   
@@ -104,8 +108,8 @@ struct ShortestPath {
       compute_path(path, nullptr);
   }
 
-  // Get the shortest path with edge of a given color
-  void get_shortest_path(Path& path, Color_t* color) {
+  // Get the shortest path with constraint on edge given by color
+  void get_shortest_path(Path& path, Color_T* color) {
     compute_path(path, color);
   }
   
@@ -131,7 +135,7 @@ private:
   }
 
   // Graph on which to run the algorithm
-  const Graph_t *graph;
+  const Graph_T<Color_T> *graph;
 
   // Store all shortest path between all nodes of the graph
   std::vector<Path> shortest_paths;
@@ -143,25 +147,28 @@ private:
   static ObjectCounter obj_count;
 };
 
-template <typename Color_t, typename Graph_t>
-ObjectCounter ShortestPath<Color_t, Graph_t>::obj_count;
+template <template<typename> class Graph_T, typename Color_T>
+ObjectCounter ShortestPath<Graph_T<Color_T>>::obj_count;
 
 /*
  * Use of Dijkstra algorithm to compute shortest path
  */
-template <typename Color_t, typename Graph_t>
-struct DijkstraShortestPath: ShortestPath<Color_t, Graph_t> {
+template <typename Graph_T>
+struct DijkstraShortestPath;
   
-  DijkstraShortestPath(): ShortestPath<Color_t, Graph_t>(dijkstra) {}
+template <template<typename> class Graph_T, typename Color_T>
+struct DijkstraShortestPath<Graph_T<Color_T>>: ShortestPath<Graph_T<Color_T>> {
   
-  DijkstraShortestPath(const Graph_t& graph):
-    ShortestPath<Color_t, Graph_t>(graph, dijkstra) {}
+  DijkstraShortestPath(): ShortestPath<Graph_T<Color_T>>(dijkstra) {}
+  
+  DijkstraShortestPath(const Graph_T<Color_T>& graph):
+    ShortestPath<Graph_T<Color_T>>(graph, dijkstra) {}
   
   // Create a new object
   // Note: this is safe since we use unique pointer and move it to the caller.
-  virtual std::unique_ptr<ShortestPath<Color_t, Graph_t>> clone(const Graph_t& graph)
+  virtual std::unique_ptr<ShortestPath<Graph_T<Color_T>>> clone(const Graph_T<Color_T>& graph)
     const override {
-    std::unique_ptr<DijkstraShortestPath<Color_t, Graph_t>>
+    std::unique_ptr<DijkstraShortestPath<Graph_T<Color_T>>>
       p{new DijkstraShortestPath(graph)};
     return std::move(p);
   }
@@ -170,9 +177,9 @@ private:
   // Compute the shortest path of a given color between 2 nodes
   // (path.n1 and path.n2) using Dijkstra algorithm
   void compute_path(Path& path,
-		    Color_t* color=nullptr) override {
+		    Color_T* color=nullptr) override {
 
-    const Graph_t* graph{this->get_graph()};
+    const Graph_T<Color_T>* graph{this->get_graph()};
     unsigned int graph_size{graph->V()};
     
     Node start{path.n1};
@@ -272,25 +279,25 @@ private:
 /*
  * Use of Bellman-Ford algorithm to compute shortest path
  */
-template <typename Color_t, typename Graph_t>
-struct BellmanFordShortestPath: ShortestPath<Color_t, Graph_t> {
+template <template<typename> class Graph_T, typename Color_T>
+struct BellmanFordShortestPath: ShortestPath<Graph_T<Color_T>> {
   
-  BellmanFordShortestPath(): ShortestPath<Color_t, Graph_t>(bellman_ford) {}
+  BellmanFordShortestPath(): ShortestPath<Graph_T<Color_T>>(bellman_ford) {}
   
-  BellmanFordShortestPath(const Graph_t& graph):
-    ShortestPath<Color_t, Graph_t>(graph, bellman_ford) {}
+  BellmanFordShortestPath(const Graph_T<Color_T>& graph):
+    ShortestPath<Graph_T<Color_T>>(graph, bellman_ford) {}
   
   // Create a new object
   // Note: this is safe since we use unique pointer and move it to the caller.
-  virtual std::unique_ptr<ShortestPath<Color_t, Graph_t>> clone(const Graph_t& graph)
+  virtual std::unique_ptr<ShortestPath<Graph_T<Color_T>>> clone(const Graph_T<Color_T>& graph)
     const override {
-    std::unique_ptr<BellmanFordShortestPath<Color_t, Graph_t>>
+    std::unique_ptr<BellmanFordShortestPath<Graph_T, Color_T>>
       p{new BellmanFordShortestPath(graph)};
     return std::move(p);
   }
   
 private:
-  void compute_path(Path& path, Color_t* color) override {
+  void compute_path(Path& path, Color_T* color) override {
     //TODO
   }
   

@@ -15,16 +15,19 @@
  * cost given a algorithm (e.g. Dijkstra) to compute shortest paths of random
  * undirected weighted graphs.
  */
-template <typename Color_t, typename Graph_t>
-struct ShortestPathMonteCarlo:
-  MonteCarlo<ShortestPath<Color_t, Graph_t>> {
+template <typename Graph_T>
+struct ShortestPathMonteCarlo;
+
+template <template<typename> class Graph_T, typename Color_T>
+struct ShortestPathMonteCarlo<Graph_T<Color_T>>:
+  MonteCarlo<ShortestPath<Graph_T<Color_T>>> {
   
-  ShortestPathMonteCarlo(ShortestPath<Color_t, Graph_t>& algo,
+  ShortestPathMonteCarlo(ShortestPath<Graph_T<Color_T>>& algo,
 			 unsigned int graph_size,
 			 double graph_density, unsigned int threads=0):
     graph_size{graph_size},
     graph_density{graph_density},
-      MonteCarlo<ShortestPath<Color_t, Graph_t>>{algo, threads} {
+    MonteCarlo<ShortestPath<Graph_T<Color_T>>>{algo, threads} {
 	// Set the number of threads in case it was not given
 	if(threads == 0)
 	  this->set_threads(std::thread::hardware_concurrency());
@@ -110,7 +113,7 @@ private:
   double graph_density;
 
   // Statistics
-  struct Stats: MonteCarlo<ShortestPath<Color_t, Graph_t>>::Stats {
+  struct Stats: MonteCarlo<ShortestPath<Graph_T<Color_T>>>::Stats {
     
     // Store average distance for each trial
     std::vector<double> avg_distances;
@@ -125,7 +128,7 @@ private:
 
     // Constructor. For the stats object to be valid the number of run
     // will have to be set
-    Stats(): MonteCarlo<ShortestPath<Color_t, Graph_t>>::Stats() {}
+    Stats(): MonteCarlo<ShortestPath<Graph_T<Color_T>>>::Stats() {}
     
     void compute(double runs) override {
       

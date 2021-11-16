@@ -1,6 +1,8 @@
 #ifndef OBJECTCOUNTER_H
 #define OBJECTCOUNTER_H
 
+#include <mutex>
+
 // Simple counter to track the number of object created
 struct ObjectCounter {
   ObjectCounter(): count{0} {}

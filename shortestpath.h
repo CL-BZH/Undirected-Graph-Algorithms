@@ -39,6 +39,11 @@ struct Path {
     return ((!route.empty()) && (route[0].id == n1.id));
   }
   
+  // Define the "is greater" operator such that the path can be stored in
+  // a priority queue ordered according to the path's length
+  bool operator>(const Path& rhs) const {
+    return distance > rhs.distance;
+  }
 };
 
 /*
@@ -46,13 +51,14 @@ struct Path {
  * That is any algorithm (Dijkstra, Bellman-Ford, ...) used to compute 
  * shortest paths must comply to this interface (inheritate).
  */
+template <typename Color_t, typename Graph_t>
 struct ShortestPath {
   
   ShortestPath(const std::string& name=""): graph{nullptr}, name{name} {
     ++obj_count;
   }
 
-  ShortestPath(const Graph& graph, const std::string& name=""):
+  ShortestPath(const Graph_t& graph, const std::string& name=""):
     graph{&graph}, name{name} {
     ++obj_count;
   }
@@ -63,22 +69,25 @@ struct ShortestPath {
 
   // Enable the copy of the derived class such that computation can be run
   // in parallell by multiple threads.
-  virtual std::unique_ptr<ShortestPath> clone(const Graph& graph) const = 0;
+  virtual std::unique_ptr<ShortestPath<Color_t, Graph_t>> clone(const Graph_t& graph) const = 0;
   
   // Compute the shortest path between 2 nodes
-  virtual void compute_path(Path& path) = 0;
+  //virtual void compute_path(Path& path) = 0;
+
+  // Compute the shortest path of a given color between 2 nodes
+  virtual void compute_path(Path& path, Color_t* color=nullptr) = 0;
 
   // Get algorithm name
   const std::string get_name() {
     return name;
   };
   
-  void set_graph(const Graph& g) {
+  void set_graph(const Graph_t& g) {
     graph = &g;
     shortest_paths.clear();
   }
   
-  const Graph* get_graph() const {
+  const Graph_t* get_graph() const {
     return graph;
   }
   
@@ -92,9 +101,14 @@ struct ShortestPath {
     if(path_is_known(path.n1, path.n2, path.route))
       return;
     else
-      compute_path(path);
+      compute_path(path, nullptr);
   }
 
+  // Get the shortest path with edge of a given color
+  void get_shortest_path(Path& path, Color_t* color) {
+    compute_path(path, color);
+  }
+  
   // Get the current number of object alive
   unsigned int instances() const {
     return obj_count();
@@ -117,7 +131,7 @@ private:
   }
 
   // Graph on which to run the algorithm
-  const Graph *graph;
+  const Graph_t *graph;
 
   // Store all shortest path between all nodes of the graph
   std::vector<Path> shortest_paths;
@@ -129,32 +143,36 @@ private:
   static ObjectCounter obj_count;
 };
 
-ObjectCounter ShortestPath::obj_count;
+template <typename Color_t, typename Graph_t>
+ObjectCounter ShortestPath<Color_t, Graph_t>::obj_count;
 
 /*
  * Use of Dijkstra algorithm to compute shortest path
  */
-struct DijkstraShortestPath: ShortestPath {
+template <typename Color_t, typename Graph_t>
+struct DijkstraShortestPath: ShortestPath<Color_t, Graph_t> {
   
-  DijkstraShortestPath(): ShortestPath(dijkstra) {}
+  DijkstraShortestPath(): ShortestPath<Color_t, Graph_t>(dijkstra) {}
   
-  DijkstraShortestPath(const Graph& graph): ShortestPath(graph, dijkstra) {}
+  DijkstraShortestPath(const Graph_t& graph):
+    ShortestPath<Color_t, Graph_t>(graph, dijkstra) {}
   
   // Create a new object
   // Note: this is safe since we use unique pointer and move it to the caller.
-  virtual std::unique_ptr<ShortestPath> clone(const Graph& graph) const override {
-    std::unique_ptr<DijkstraShortestPath>
+  virtual std::unique_ptr<ShortestPath<Color_t, Graph_t>> clone(const Graph_t& graph)
+    const override {
+    std::unique_ptr<DijkstraShortestPath<Color_t, Graph_t>>
       p{new DijkstraShortestPath(graph)};
     return std::move(p);
   }
   
 private:
+  // Compute the shortest path of a given color between 2 nodes
+  // (path.n1 and path.n2) using Dijkstra algorithm
+  void compute_path(Path& path,
+		    Color_t* color=nullptr) override {
 
-  // Compute the shortest path between 2 nodes (path.n1 and path.n2) using
-  // Dijkstra algorithm
-  void compute_path(Path& path) override {
-    
-    const Graph* graph{get_graph()};
+    const Graph_t* graph{this->get_graph()};
     unsigned int graph_size{graph->V()};
     
     Node start{path.n1};
@@ -185,16 +203,23 @@ private:
 
       // Visite each neighbor
       std::vector<std::pair<Node, double>> neighbors;
-      graph->get_neighbors(current_node, neighbors);
+      if(color == nullptr)
+	graph->get_neighbors(current_node, neighbors);
+      else
+	graph->get_neighbors(current_node, neighbors, color);
+
+			     
       if(neighbors.size() == 0) {
-	std::cout << "Node " << current_node.id << " has no neighbor" << std::endl;
+	//std::cout << "Node " << current_node.id << " has no neighbor\n";
 	continue;
       }
+      
       for(auto neighbor: neighbors) {
 	double weight{neighbor.second};
 	double value{current_node.value + weight};
 	Node neighbor_node{neighbor.first};
 	unsigned int neighbor_id{neighbor_node.id};
+
 	if(visited[neighbor_id])
 	  continue;
 	if (value < min_value[neighbor_id]) {
@@ -206,17 +231,17 @@ private:
 	}
       }
     }
-
+  
     if(!parent[end.id].exist()) {
       // There is no path to node 'end'
-      std::cout << "There is no path from node " << start.id;
-      std::cout << " to node " << end.id << std::endl;
+      //std::cout << "There is no path from node " << start.id;
+      //std::cout << " to node " << end.id << std::endl;
       return;
     }
     
-    std::cout << "Building the path from node " << start.id;
-    std::cout << " to node " << end.id << std::endl;
-
+    //std::cout << "Building the path from node " << start.id;
+    //std::cout << " to node " << end.id << std::endl;
+    
     path.route.push_back(end);
     
     Node previous{parent[end.id]};
@@ -227,13 +252,15 @@ private:
       path.route.insert(path.route.begin(), previous); 
       previous = parent[previous.id];
     }
-
+    
     // Set the path distance (sum of the weights of edges that make the path)
     path.distance = min_value[end.id];
- 
+
+    //std::cout << "Path length: " << path.distance << std::endl;
+    
     // Memoization
     if(path.route[0].id == path.n1.id) {
-      add_known_path(path);
+      this->add_known_path(path);
     }
   }
 
@@ -245,23 +272,25 @@ private:
 /*
  * Use of Bellman-Ford algorithm to compute shortest path
  */
-struct BellmanFordShortestPath: ShortestPath {
+template <typename Color_t, typename Graph_t>
+struct BellmanFordShortestPath: ShortestPath<Color_t, Graph_t> {
   
-  BellmanFordShortestPath(): ShortestPath(bellman_ford) {}
+  BellmanFordShortestPath(): ShortestPath<Color_t, Graph_t>(bellman_ford) {}
   
-  BellmanFordShortestPath(const Graph& graph):
-    ShortestPath(graph, bellman_ford) {}
+  BellmanFordShortestPath(const Graph_t& graph):
+    ShortestPath<Color_t, Graph_t>(graph, bellman_ford) {}
   
   // Create a new object
   // Note: this is safe since we use unique pointer and move it to the caller.
-  virtual std::unique_ptr<ShortestPath> clone(const Graph& graph) const override {
-    std::unique_ptr<BellmanFordShortestPath>
+  virtual std::unique_ptr<ShortestPath<Color_t, Graph_t>> clone(const Graph_t& graph)
+    const override {
+    std::unique_ptr<BellmanFordShortestPath<Color_t, Graph_t>>
       p{new BellmanFordShortestPath(graph)};
     return std::move(p);
   }
   
 private:
-  void compute_path(Path& path) override {
+  void compute_path(Path& path, Color_t* color) override {
     //TODO
   }
   

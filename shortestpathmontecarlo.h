@@ -15,15 +15,19 @@
  * cost given a algorithm (e.g. Dijkstra) to compute shortest paths of random
  * undirected weighted graphs.
  */
-struct ShortestPathMonteCarlo: MonteCarlo<ShortestPath> {
+template <typename Color_t, typename Graph_t>
+struct ShortestPathMonteCarlo:
+  MonteCarlo<ShortestPath<Color_t, Graph_t>> {
   
-  ShortestPathMonteCarlo(ShortestPath& algo, unsigned int graph_size,
+  ShortestPathMonteCarlo(ShortestPath<Color_t, Graph_t>& algo,
+			 unsigned int graph_size,
 			 double graph_density, unsigned int threads=0):
     graph_size{graph_size},
-    graph_density{graph_density}, MonteCarlo{algo, threads} {
+    graph_density{graph_density},
+      MonteCarlo<ShortestPath<Color_t, Graph_t>>{algo, threads} {
 	// Set the number of threads in case it was not given
 	if(threads == 0)
-	  set_threads(std::thread::hardware_concurrency());
+	  this->set_threads(std::thread::hardware_concurrency());
       }
 
   
@@ -41,7 +45,7 @@ struct ShortestPathMonteCarlo: MonteCarlo<ShortestPath> {
 			std::to_string(trial+1)};
       RandomGraph graph{graph_size, graph_density, graph_name};
       //Get a new algo object of the same type as the one referenced by algo
-      auto sp_algo{algo.clone(graph)};
+      auto sp_algo{this->algo.clone(graph)};
 		   		   
       MC_DEBUG_PRINT(("Thread %d - Graph %s\n",
 		      thread_number,
@@ -87,7 +91,7 @@ struct ShortestPathMonteCarlo: MonteCarlo<ShortestPath> {
   }
 
   void compute_stats() override {
-    stats.compute(get_runs());
+    stats.compute(this->get_runs());
   }
   
   void show_stats() {
@@ -106,7 +110,7 @@ private:
   double graph_density;
 
   // Statistics
-  struct Stats: MonteCarlo::Stats {
+  struct Stats: MonteCarlo<ShortestPath<Color_t, Graph_t>>::Stats {
     
     // Store average distance for each trial
     std::vector<double> avg_distances;
@@ -121,7 +125,7 @@ private:
 
     // Constructor. For the stats object to be valid the number of run
     // will have to be set
-    Stats(): MonteCarlo::Stats() {}
+    Stats(): MonteCarlo<ShortestPath<Color_t, Graph_t>>::Stats() {}
     
     void compute(double runs) override {
       
@@ -148,12 +152,12 @@ private:
     }
 
     void show() const override {
-      std::cout << "\nEstimation of the mean number of hop in a shortest path: ";
-      std::cout << mean_hop << std::endl;
-      std::cout << "Estimation of the mean distance estimation: ";
-      std::cout << mean_distance << std::endl;
-      std::cout << "Estimation of the variance of the mean distance: ";
-      std::cout << mean_distance_var << std::endl;
+      std::cout << "\nEstimation of the mean number of hop in a shortest path: "
+		<< mean_hop << std::endl
+		<< "Estimation of the mean distance estimation: "
+		<< mean_distance << std::endl
+		<< "Estimation of the variance of the mean distance: "
+		<< mean_distance_var << std::endl;
     }
     
   } stats;

@@ -24,22 +24,35 @@ CPPFLAGS += -D_PRINT_MATRIX
 # For tracing the MST algorithm
 #CPPFLAGS += -D_TRACE_MST
 
+
+# For using the ncurses
+#CPPFLAGS += -D_NCURSES
+
 # Flag to enable/disable part of the code in main.cpp
-#CPPFLAGS += -D_TEST_RANDOM_GRAPH
-#CPPFLAGS += -D_TEST_DIJKTRA
-#CPPFLAGS += -D_TEST_SHORTEST_PATH_MONTE_CARLO
+CPPFLAGS += -D_TEST_RANDOM_GRAPH
+CPPFLAGS += -D_TEST_DIJKTRA
+CPPFLAGS += -D_TEST_SHORTEST_PATH_MONTE_CARLO
 CPPFLAGS += -D_TEST_MST
+
+
+INCLUDES =
 
 # If you installed Eigen and want to use it for showing the connectivity matrix
 # add the line below where "path_to_eigen" is where to find Eigen
-#INCLUDES = -I/path_to_eigen/
-INCLUDES = -I../../eigen/
+#INCLUDES += -I/path_to_eigen/
+INCLUDES += -I../../eigen/
 
 # define library paths in addition to /usr/lib
 LFLAGS =
 
 # define any libraries to link into executable
-LIBS = 
+LIBS =
+
+# For using ncurses
+# Make sure you installed it before
+# e.g. on Ubuntu: sudo apt-get install libncurses5-dev libncursesw5-dev
+# on Fedora: sudo dnf install ncurses-devel ncurses
+#LIBS += -lncurses
 
 # define the C++ source files
 SRCS = main.cpp

@@ -2,6 +2,7 @@
 #include "mst.h"
 #include "shortestpathmontecarlo.h"
 
+
 int main() {
 
 #ifdef _TEST_RANDOM_GRAPH
@@ -23,11 +24,11 @@ int main() {
 
   if(neighbors.size() != 0) {
     if(neighbors.size() == 1) {
-      std::cout << "Unique neighbor of node " << n0.id;
-      std::cout << " is node (format is: {node id, distance})" << std::endl;
+      std::cout << "Unique neighbor of node " << n0.id
+		<< " is node (format is: {node id, distance})" << std::endl;
     } else {
-      std::cout << "All neighbors of node " << n0.id;
-      std::cout << " are nodes (format is: {node id, distance})" << std::endl;
+      std::cout << "All neighbors of node " << n0.id
+		<< " are nodes (format is: {node id, distance})" << std::endl;
     }
     for (auto neighbor: neighbors) {
       std::cout << '{' << neighbor.first << ", " << neighbor.second << "}, ";
@@ -45,9 +46,15 @@ int main() {
   
   RandomGraph ugraph(10, 0.2);
 
-  DijkstraShortestPath dsp{ugraph};
-  Node n1{1};
-  Path path{n0, n1};
+  #ifdef _SHOW_EDGES
+  ugraph.show();
+  #endif
+  
+  DijkstraShortestPath<void, RandomGraph> dsp{ugraph};
+  
+  Node node0{5};
+  Node node1{1};
+  Path path{node0, node1};
   dsp.get_shortest_path(path);
   if(path.is_valid())
     path.show();
@@ -58,8 +65,8 @@ int main() {
 #ifdef _TEST_SHORTEST_PATH_MONTE_CARLO  
   // MC simulation
 
-  std::cout << "\nMonte Carlo simulation for the estimation of the expected path";
-  std::cout << " length\n (path length = sum of edges' weight)" << std::endl;
+  std::cout << "\nMonte Carlo simulation for the estimation of the expected "
+	    << "path length\n (path length = sum of edges' weight)" << std::endl;
 
   unsigned int graph_size;
   double graph_density;
@@ -69,19 +76,27 @@ int main() {
   std::cout << "density: ";
   std::cin >> graph_density;
   
-  ShortestPathMonteCarlo spmc{dsp, graph_size, graph_density};
+  RandomGraph rugraph(10, 0.2);
 
-  std::cout << "Number of run ";
-  std::cout << "(Optional just press enter to get the default value of ";
-  std::cout << spmc.get_runs() << "):" << std::endl;
+  #ifdef _SHOW_EDGES
+  rugraph.show();
+  #endif
+  
+  DijkstraShortestPath<void, RandomGraph> sp_algo{rugraph};
+  
+  ShortestPathMonteCarlo<void, RandomGraph> spmc{sp_algo, graph_size, graph_density};
+
+  std::cout << "Number of run "
+	    << "(Optional just press enter to get the default value of "
+	    << spmc.get_runs() << "):" << std::endl;
   
   std::string runs;
   std::cin.ignore();
   getline(std::cin, runs);
   
-  std::cout << "The number of threads is set to " << spmc.get_threads() << ".\n";
-  std::cout << "(press enter if you don't want to change it." << std::endl;
-  std::cout << "Else enter the number of threads you want)" << std::endl;
+  std::cout << "The number of threads is set to " << spmc.get_threads() << ".\n"
+	    << "(press enter if you don't want to change it." << std::endl
+	    << "Else enter the number of threads you want)" << std::endl;
   
   std::string threads;
   getline(std::cin, threads);
@@ -135,5 +150,5 @@ int main() {
   djp.draw();
   
 #endif //_TEST_MST
-  
+
 }

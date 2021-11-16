@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <thread>
 
 #include <cstdio>
 
@@ -144,7 +145,8 @@ private:
     auto duration{duration_cast<microseconds>(stop - start)};
     auto sec{duration_cast<seconds>(duration)};
     auto us{duration - std::chrono::duration_cast<std::chrono::microseconds>(sec)};
-    std::cout << "Duration : " << sec.count() << " s " << us.count() << " us" << std::endl;
+    std::cout << "Duration : " << sec.count() << " s " << us.count()
+	      << " us" << std::endl;
   }
   
   // Number of threads to spawn to run the simulation

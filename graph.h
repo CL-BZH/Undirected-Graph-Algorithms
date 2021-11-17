@@ -116,7 +116,7 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
  * (i.e. weight of edges between nodes - with infinite meaning no edge)
  * 
  */
-template <typename = void*>
+template <typename = void>
 struct Graph_T {
 
   /*
@@ -617,7 +617,7 @@ private:
  * Undirected random graph class.
  * An undirected random graph IS a undirected graph, hence the inheritance.
  */
-template <typename = void*>
+template <typename = void>
 struct RandomGraph_T: Graph {
 
   RandomGraph_T(unsigned int size=graph_default_size,

@@ -1,0 +1,9 @@
+# Editor backups
+*~
+
+# macOS
+.DS_Store
+
+# Build outputs
+*.o
+spmc

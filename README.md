@@ -1,6 +1,6 @@
 # Undirected Graph Algorithms
 
-This depository contains some code I wrote for the course "[C++ For C Programmers, Part A](https://www.coursera.org/learn/c-plus-plus-a)" delivered by the University of California Santa Cruz on Coursera.
+This repository contains some code I wrote for the course "[C++ For C Programmers, Part A](https://www.coursera.org/learn/c-plus-plus-a)" delivered by the University of California Santa Cruz on Coursera.
 
 The purpose is to run algorithms on undirected graphs.  
 Currently implemented algorithms are:
@@ -24,12 +24,12 @@ make
 ```
 Preprocessor flags defined in Makefile:  
 * _SHOW_EDGES is used to list all edges between nodes.  
-* _PRINT_MATRIX is used to print the connectivity matrix (where the abscence of edge between two nodes `i` and `j` is indicated by the value `inf` at position `(i,j)` and `(j,i)`.) You need to install [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) for this.
+* _PRINT_MATRIX is used to print the connectivity matrix (where the absence of edge between two nodes `i` and `j` is indicated by the value `inf` at position `(i,j)` and `(j,i)`.) You need to install [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) for this.
 * _DEBUG_MC can be used for tracing Monte-Carlo simulations
 * _TRACE_MST is used to trace Minimum Spanning Tree algorithm
 * _TEST_RANDOM_GRAPH to enable testing random graph in main.cpp
 * _TEST_DIJKTRA to enable testing Dijkstra algorithm in main.cpp
-* _TEST_SHORTEST_PATH_MONTE_CARLO to enable running MC simulation for shortested path in main.cpp
+* _TEST_SHORTEST_PATH_MONTE_CARLO to enable running MC simulation for shortest path in main.cpp
 * _TEST_MST to enable testing Minimum Spanning Tree algorithm in main.cpp
 
 ## Usage
@@ -39,10 +39,10 @@ Preprocessor flags defined in Makefile:
 ```
 
 ## Examples of results
-### <span style="color:lime">Monte-Carlo simulation for shortest path</span>
+### Monte-Carlo simulation for shortest path
 Below are results obtained when running a Monte-Carlo simulation for estimating the expected shortest path length and cost of a random undirected graph using Dijkstra algorithm.  
 Graphs of size 50 were used with density of 0.2 and of 0.4 respectively. The range for the edges' weights is [1.0, 10.0].  
-Each test ran 100 simulations in parallele using 4 threads.
+Each test ran 100 simulations in parallel using 4 threads.
 
 ```
 Monte Carlo simulation for the estimation of the expected path length
@@ -52,7 +52,7 @@ density: 0.2
 Number of run (Optional just press enter to get the default value of 100):
 
 The number of threads is set to 4.
-(press enter if you dont want to change it.
+(press enter if you don't want to change it.
 Else enter the number of threads you want)
 
 Run simulation with 4 threads
@@ -83,8 +83,8 @@ Estimation of the variance of the mean distance: 0.0251515
 
 ```
 
-### <span style="color:lime">Minimum Spanning Trees</span>
-An example on how to run the Prim's algorithm on an undirect graph is shown in main.cpp.  
+### Minimum Spanning Trees
+An example on how to run the Prim's algorithm on an undirected graph is shown in main.cpp.  
 Below are the results when tests are performed on the graph described in file `mst_test.txt` that can be found in the `Test` directory.  
 The graph looks like this:  
 ![mst_test.txt](./Images/mst_test.png "Graph on which MST algo is run")  
@@ -97,16 +97,16 @@ And the minimum spanning trees obtained taking node 0, 1, 2, 3 and 4 as root res
 ![mst_test.txt](./Images/mst_test_mst_root_4.png "MST for node 4 as root")  
 
 ## Code details
-The C++ code is splitted in eight files:
+The C++ code is split into eight files:
 
-* <span style="color:lime">graph.h</span>
-* <span style="color:lime">shortestpath.h</span>
-* <span style="color:lime">montecarlo.h</span>
-* <span style="color:lime">shortestpathmontecarlo.h</span>
-* <span style="color:lime">dfs.h</span>
-* <span style="color:lime">mst.h</span>
-* <span style="color:lime">trace.h</span>
-* <span style="color:lime">main.cpp</span>
+* graph.h
+* shortestpath.h
+* montecarlo.h
+* shortestpathmontecarlo.h
+* dfs.h
+* mst.h
+* trace.h
+* main.cpp
 
 There is also a `Tools` directory with some tools in `Python` for plotting graphs and trees (Python `igraph` needs to be installed to be able to use these tools).  
 The `Test` directory contains text files describing graphs. These files' path can be passed to Graph to initialize a graph (see an example on how to do that in `main.cpp`).
@@ -127,7 +127,7 @@ Let's detail the content of each files.
 since I prefer to have the public elements of a class at the beginning of the class I use "struct" keyword instead of "class".
 
 ---
-### <span style="color:lime">graph.h</span>
+### graph.h
 
 This file contains all the definitions needed for undirected graphs:  
 * `struct Node`
@@ -135,8 +135,8 @@ This file contains all the definitions needed for undirected graphs:
 * `struct Graph`
 * `struct RandomGraph: Graph`
 
-`struct Nodes` defines the vertices of a graph.
-A node that belongs to a graph is located in the graph by its id, an unsigned integer that is use to index an array. It can also have a value assigned by an algorithm using the graph.  
+`struct Node` defines the vertices of a graph.
+A node that belongs to a graph is located in the graph by its id, an unsigned integer that is used to index an array. It can also have a value assigned by an algorithm using the graph.  
 The '`<<`' operator is overloaded to print node's information.  
 The comparison operator '`>`' is overloaded such that the node can be stored in a priority queue ordered according to the node's value given by the algorithm running on the graph.
 
@@ -147,7 +147,7 @@ The '`<<`' operator is overloaded to print edge's information.
 
 `struct Graph` defines an undirected (weighted) graph.  
 The copy constructor and assignment are deleted so that we don't fill the memory with copy of a graph on which instances of an algorithm would run in parallel.  
-To save memory, only the lower half of the connectivity matrix is stored as an array. If an edge exists between two nodes then the weight of that edge is store in the array at the index uniquely identifying that edge *(otherwise, **infinity** is stored)*.  
+To save memory, only the lower half of the connectivity matrix is stored as an array. If an edge exists between two nodes then the weight of that edge is stored in the array at the index uniquely identifying that edge *(otherwise, **infinity** is stored)*.  
 For example, the below connectivity matrix **M** of an undirected graph of size 5 (with no node connected to itself)  
 
 |   | node 0 | node 1 | node 2 | node 3 | node 4 |
@@ -166,42 +166,40 @@ That is:
 For a node `i` and a node `j` how is computed the index in the array of the edge between these two nodes?  
 Well, it's pretty simple:
 * swap `i` and `j` if `i < j` (because we consider only the lower triangular part of the connectivity matrix)
-* index `k` is equal to <!-- $\frac{i(i-1)}{2} + j$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20j">  
-**Proof**:   
-For a square matrix of size `2` elements of the lower triangular part can indexed this way:  
-0  
-For a square matrix of size `3` elements of the lower triangular part can indexed this way:  
-0  
-1 &nbsp; 2    
-For a square matrix of size `4` elements of the lower triangular part can indexed this way:  
-0  
-1 &nbsp; 2  
-3 &nbsp; 4 &nbsp; 5   
-So, on row `i=0` we have `T(0)=1` entry. If `T(i)` is the number of entry on row `i` then the number of entries on row `i+1` is `T(i+1) = T(i) + 1`. Hence, the number of entry on row `l` is `l+1`. If we index the entries as shown above, then the index at the beginning of row `i` `(i>0)` will be the sum of number of entries from row `0` to row `i-1`, i.e. <!-- $\sum_{l=0}^{i-1}(l+1) = \sum_{l=1}^{i}{l} = \frac{i(i-1)}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Csum_%7Bl%3D0%7D%5E%7Bi-1%7D(l%2B1)%20%3D%20%5Csum_%7Bl%3D1%7D%5E%7Bi%7D%7Bl%7D%20%3D%20%5Cfrac%7Bi(i-1)%7D%7B2%7D">.  
-Therefore the index at column `j` of row `i` is <!-- $\frac{i(i-1)}{2} + j$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20j">.
+* index `k` is equal to $`\frac{i(i-1)}{2} + j`$
 
-So, in the previous example, the edge between node 4 and 1 is found in the array at index <!-- $\frac{4(4-1)}{2} + 1 = 7$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7B4(4-1)%7D%7B2%7D%20%2B%201%20%3D%207">. The weight for this edge is `weights[7] = 9`.
+**Proof**:  
+Since no node is connected to itself, only the entries strictly below the diagonal are stored: row `i` has `i` entries, at columns `j = 0, ..., i-1`. Indexing them row after row gives:  
+row 1: 0  
+row 2: 1 &nbsp; 2  
+row 3: 3 &nbsp; 4 &nbsp; 5  
+...  
+The first entry of row `i` therefore comes after all the entries of rows `1` to `i-1`, so its index is $`\sum_{l=1}^{i-1} l = \frac{i(i-1)}{2}`$.  
+Therefore the index at column `j` of row `i` is $`\frac{i(i-1)}{2} + j`$.
+
+So, in the previous example, the edge between node 4 and 1 is found in the array at index $`\frac{4(4-1)}{2} + 1 = 7`$. The weight for this edge is `weights[7] = 9`.
 
 In the opposite direction, having an index `k` for the array of edges weights, how can we find the 2 nodes, `i` and `j`, that are linked by this edge?  
-Well, we know that <!-- $\space k = \frac{i(i-1)}{2} + j \space$ with $\space 0\le j<i$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20k%20%3D%20%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20j%20%5Cspace%24%20with%20%24%5Cspace%200%5Cle%20j%3Ci"> *(swap `i` and `j` if needed)*.  
+Well, we know that $`k = \frac{i(i-1)}{2} + j`$ with $`0 \le j < i`$ *(swap `i` and `j` if needed)*.
 
-So, we have <!-- $\frac{i(i-1)}{2} \le k < \frac{i(i-1)}{2} + i$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%5Cle%20k%20%3C%20%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20i">.  
+So, we have $`\frac{i(i-1)}{2} \le k < \frac{i(i-1)}{2} + i = \frac{i(i+1)}{2}`$.
 
-Solving <!-- $\space k = \frac{i(i-1)}{2} \space $ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20k%20%3D%20%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%5Cspace"> gives <!-- $\space i = \frac{-1+\sqrt{1+8k}}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20i%20%3D%20%5Cfrac%7B-1%2B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D">  
+The left inequality, $`i^2 - i - 2k \le 0`$, gives $`i \le \frac{1+\sqrt{1+8k}}{2}`$.
 
-And solving <!-- $\space k = \frac{i(i-1)}{2} + i \space $ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20k%20%3D%20%5Cfrac%7Bi(i-1)%7D%7B2%7D%20%2B%20i%20%5Cspace"> gives <!-- $\space i = \frac{1+\sqrt{1+8k}}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cspace%20i%20%3D%20%5Cfrac%7B1%2B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D">  
-   
-Therefore, <!-- $\frac{-1+\sqrt{1+8k}}{2} < i \le \frac{1+\sqrt{1+8k}}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7B-1%2B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D%20%3C%20i%20%5Cle%20%5Cfrac%7B1%2B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D"> , or again, <!-- $\frac{\sqrt{1+8k}}{2} - \frac{1}{2} < i \le \frac{\sqrt{1+8k}}{2} + \frac{1}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D%20-%20%5Cfrac%7B1%7D%7B2%7D%20%3C%20i%20%5Cle%20%5Cfrac%7B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D%20%2B%20%5Cfrac%7B1%7D%7B2%7D">.  
-Hence, <!-- $i = \left\lfloor\frac{\sqrt{1+8k}}{2} + \frac{1}{2}\right\rfloor$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=i%20%3D%20%5Cleft%5Clfloor%5Cfrac%7B%5Csqrt%7B1%2B8k%7D%7D%7B2%7D%20%2B%20%5Cfrac%7B1%7D%7B2%7D%5Cright%5Crfloor"> and <!-- $j = k - \frac{i(i-1)}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=j%20%3D%20k%20-%20%5Cfrac%7Bi(i-1)%7D%7B2%7D">.
+The right inequality, $`i^2 + i - 2k > 0`$, gives $`i > \frac{-1+\sqrt{1+8k}}{2}`$.
 
-Finally, the last structure defined in graph.h is `struct RandomGraph` which inherites from `Graph` since it is a graph. The two main additions are the `density` and the `range`.  
+Therefore, $`\frac{-1+\sqrt{1+8k}}{2} < i \le \frac{1+\sqrt{1+8k}}{2}`$, or again, $`\frac{\sqrt{1+8k}}{2} - \frac{1}{2} < i \le \frac{\sqrt{1+8k}}{2} + \frac{1}{2}`$.  
+This interval has length 1, so it contains exactly one integer: $`i = \left\lfloor\frac{\sqrt{1+8k}}{2} + \frac{1}{2}\right\rfloor`$ and $`j = k - \frac{i(i-1)}{2}`$.  
+In the previous example, $`k = 7`$ gives $`i = \lfloor \sqrt{57}/2 + 1/2 \rfloor = \lfloor 4.27 \rfloor = 4`$ and $`j = 7 - 6 = 1`$.
+
+Finally, the last structure defined in graph.h is `struct RandomGraph` which inherits from `Graph` since it is a graph. The two main additions are the `density` and the `range`.  
 `density` defines the number of connections in the graph (see below).  
 `range` defines the range for the weights to be randomly selected in.
 
 The private function `build_edges()` is in charge of randomly selecting edges and allocating their weight.  
 Here is how it works:  
-We know that in an undirected graph of size `V` *(with no node connected to itself)* we can have a maximum of <!-- $\frac{V(V-1)}{2}$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cfrac%7BV(V-1)%7D%7B2%7D"> edges between nodes *(then we have a fully connected graph)*.  
-Hence, to get a random graph of a given `density`, we must uniformly pick up <!-- $\left\lfloor\ density \times \frac{V(V-1)}{2}\right\rfloor$ --> <img style="transform: translateY(0.1em); background: white;" src="https://render.githubusercontent.com/render/math?math=%5Cleft%5Clfloor%5C%20density%20%5Ctimes%20%5Cfrac%7BV(V-1)%7D%7B2%7D%5Cright%5Crfloor"> edges.  
+We know that in an undirected graph of size `V` *(with no node connected to itself)* we can have a maximum of $`\frac{V(V-1)}{2}`$ edges between nodes *(then we have a fully connected graph)*.  
+Hence, to get a random graph of a given `density`, we must uniformly pick up $`\left\lfloor \mathrm{density} \times \frac{V(V-1)}{2}\right\rfloor`$ edges.  
 Below is the pseudo-code for doing that *(I used // for comments)*:  
 ```
 //Maximum number of edges in the graph
@@ -212,7 +210,7 @@ edges = floor(density x max_edges)
 available_edges =  [0,..., max_edges-1]
 edge_count = 0  
 selected_edges = []
-selected_edges_weights = []
+selected_edges_weight = []
 while edge_count++ < edges:  
     //Randomly select an edge among the available ones
     k = random.int(0,..., available_edges.size() - 1) 
@@ -223,16 +221,16 @@ while edge_count++ < edges:
     weight = random.double(range)
     //Store the weight of the selected edge
     selected_edges_weight.push(weight)
-    //Rebuild the list of available edges' indexes removing the selected one
-    available_edges = [0,..., k - 1] + [k + 1, ..., max_edges - 1]
+    //Remove the selected edge from the available ones (the element at position k)
+    available_edges = available_edges[0,..., k - 1] + available_edges[k + 1, ..., end]
 ```  
 > Nota Bene:  
 The graph object does not store any node. It defines only the topology of the graph *(i.e. weights of edges between nodes - with infinite value meaning no edge)*.  
 It is up to the application using the graph to instantiate nodes *(see `mst.h` for example)*.
       
 ---
-### <span style="color:lime">shortestpath.h</span>
-This file contains all the definitions for the shortest path algoritms.
+### shortestpath.h
+This file contains all the definitions for the shortest path algorithms.
 Currently only Dijkstra's algorithm is implemented *(Bellman-Ford algorithm is in the TODO list...)*  
 
 Structured types defined in this file:  
@@ -244,17 +242,17 @@ Structured types defined in this file:
 `struct Path` defines a path between two nodes `n1` and `n2`.
 
 `struct ShortestPath` defines the interface for shortest path algorithm.  
-Since it is an interface the functions for computing a shortest path are pure virtual functions and are overriden in the derived class.
+Since it is an interface the functions for computing a shortest path are pure virtual functions and are overridden in the derived class.
 ```C++
 virtual std::unique_ptr<ShortestPath> clone(const Graph& graph) const = 0;
 virtual void compute_path(Path& path) = 0;
 ```
-`struct DijkstraShortestPath` and `struct BellmanFordShortestPath` inherite from `struct ShortestPath` and override the functions `clone()` and `compute_path()`.
+`struct DijkstraShortestPath` and `struct BellmanFordShortestPath` inherit from `struct ShortestPath` and override the functions `clone()` and `compute_path()`.
 
 `compute_path()` in `struct DijkstraShortestPath` implements the Dijkstra algorithm. When a shortest path between two nodes is found it is added to the known path for memoization *(i.e. `struct DijkstraShortestPath` can be used for dynamic programming)*.  
 
 ---
-### <span style="color:lime">montecarlo.h</span>
+### montecarlo.h
 This file contains the generic definition for running a Monte-Carlo simulation:
 * `template <typename T>  struct MonteCarlo`
 
@@ -266,19 +264,19 @@ The base structure `Stats` can be inherited by the derived class (e.g ShortestPa
 `std::cout` is deactivated when running the simulation but the preprocessor flag _DEBUG_MC *(see Makefile)* can be used to get some traces (e.g. number of thread spawn, number of run per thread, etc.)
 
 ---
-### <span style="color:lime">shortestpathmontecarlo.h</span>
-This file contains the definition for running a Shortest Path Monte-Carlo simulation aimed at computing an estimate of the espected shortest path length and cost of an undirected graph:
+### shortestpathmontecarlo.h
+This file contains the definition for running a Shortest Path Monte-Carlo simulation aimed at computing an estimate of the expected shortest path length and cost of an undirected graph:
 * `struct ShortestPathMonteCarlo: MonteCarlo<ShortestPath>`
 
 This is where the real workload for the threads running the Monte-Carlo simulation is defined (i.e. `thread_work()` is overridden).
 
 ---
-### <span style="color:lime">dfs.h</span>
+### dfs.h
 This file contains the object definition to run Depth First Search algorithm on a graph.  
 It can be used for example to check if a graph is connected since for a connected graph the number of visited nodes should be equal to the number of vertices *(see main.cpp)*.
 
 ---
-### <span style="color:lime">mst.h</span>
+### mst.h
 This file contains the class definitions that can be used to run Minimum Spanning Tree algorithms on a connected graph.  
 The four objects' types defined in that file are:
 * `struct MstElement` 
@@ -286,7 +284,7 @@ The four objects' types defined in that file are:
 * `struct Prim: MST`
 * `struct Kruskal: MST` *(Not complete)*
 
-An `MST` object has a vector of `MstElement` that is of size the number of vertices in the graph. This is where the nodes of the graph are instatiated *(remember a graph object defines only the topology of a graph)*.  **What is stored in the priority queue are pointers to these elements**.  
+An `MST` object has a vector of `MstElement` that is of size the number of vertices in the graph. This is where the nodes of the graph are instantiated *(remember a graph object defines only the topology of a graph)*.  **What is stored in the priority queue are pointers to these elements**.  
 So, an `MstElement` stores a pointer to a node *(nodes are created on the heap)* and a boolean telling if the node was selected. It also has a field to store the id of its parent. The value given to the node by the algorithm is stored in the node itself *(see `Node` class in `graph.h`)*.  
 The `MstElement` class also overload the '`>`' operator so that MST's elements can be compared by the STL priority queue.   
 The base class called `MST` is generic and defines the interface for real implementation of the minimum spanning tree algorithms.   
@@ -315,7 +313,7 @@ To print the minimum spanning tree with the following format:
 To draw the spanning tree using the Python script `draw_mst.py` *(located in the `Tools` directory)*.  
 Minimum spanning trees in the section "**Examples of results**" above were drawn using this function. 
 
-Furthermore, the operator `[]` is oveloaded as **accessor** and **mutator** such that the derived class can directly index the `mst` vector of `MstElement` stored in the `MST` object.
+Furthermore, the operator `[]` is overloaded as **accessor** and **mutator** such that the derived class can directly index the `mst` vector of `MstElement` stored in the `MST` object.
 
 
 The Dijkstra-Jarnik-Prim's algorithm is implemented in the `run()` method  of `struct Prim`.  
